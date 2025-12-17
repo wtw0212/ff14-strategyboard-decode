@@ -1,121 +1,197 @@
-# Object Type Mapping: Job & Role IDs
+# Object Type Mapping
 
-This document catalogs the verified **Job and Role IDs** used in the FFXIV Strategy Board system. These IDs are found in the `JOB-MAPPING` section of the strategy data (Format: `02 00 [ID] 00`).
+Complete binary mapping for FFXIV Strategy Board objects.
+Format: `02 00 [TYPE_ID] 00` (4 bytes per object)
 
-## Disciple of War & Magic (Jobs)
+---
+
+## 1. Disciple of War & Magic (Jobs)
 
 | ID (Dec) | ID (Hex) | Job Name | Role |
-| :--- | :--- | :--- | :--- |
-| **27** | 0x1B | Paladin | Tank |
-| **29** | 0x1D | Warrior | Tank |
-| **38** | 0x26 | Dark Knight | Tank |
-| **43** | 0x2B | Gunbreaker | Tank |
-| **28** | 0x1C | Monk | Melee DPS |
-| **30** | 0x1E | Dragoon | Melee DPS |
-| **36** | 0x24 | Ninja | Melee DPS |
-| **40** | 0x28 | Samurai | Melee DPS |
-| **45** | 0x2D | Reaper | Melee DPS |
-| **101** | 0x65 | Viper | Melee DPS |
-| **31** | 0x1F | Bard | Physical Ranged DPS |
-| **37** | 0x25 | Machinist | Physical Ranged DPS |
-| **44** | 0x2C | Dancer | Physical Ranged DPS |
-| **33** | 0x21 | Black Mage | Magical Ranged DPS |
-| **34** | 0x22 | Summoner | Magical Ranged DPS |
-| **41** | 0x29 | Red Mage | Magical Ranged DPS |
-| **42** | 0x2A | Blue Mage | Limited Job |
-| **102** | 0x66 | Pictomancer | Magical Ranged DPS |
-| **32** | 0x20 | White Mage | Healer |
-| **35** | 0x23 | Scholar | Healer |
-| **39** | 0x27 | Astrologian | Healer |
-| **46** | 0x2E | Sage | Healer |
+| :---: | :---: | :--- | :--- |
+| 27 | 0x1B | Paladin | Tank |
+| 29 | 0x1D | Warrior | Tank |
+| 38 | 0x26 | Dark Knight | Tank |
+| 43 | 0x2B | Gunbreaker | Tank |
+| 28 | 0x1C | Monk | Melee DPS |
+| 30 | 0x1E | Dragoon | Melee DPS |
+| 36 | 0x24 | Ninja | Melee DPS |
+| 40 | 0x28 | Samurai | Melee DPS |
+| 45 | 0x2D | Reaper | Melee DPS |
+| 101 | 0x65 | Viper | Melee DPS |
+| 31 | 0x1F | Bard | Physical Ranged DPS |
+| 37 | 0x25 | Machinist | Physical Ranged DPS |
+| 44 | 0x2C | Dancer | Physical Ranged DPS |
+| 33 | 0x21 | Black Mage | Magical Ranged DPS |
+| 34 | 0x22 | Summoner | Magical Ranged DPS |
+| 41 | 0x29 | Red Mage | Magical Ranged DPS |
+| 42 | 0x2A | Blue Mage | Limited Job |
+| 102 | 0x66 | Pictomancer | Magical Ranged DPS |
+| 32 | 0x20 | White Mage | Healer |
+| 35 | 0x23 | Scholar | Healer |
+| 39 | 0x27 | Astrologian | Healer |
+| 46 | 0x2E | Sage | Healer |
 
-## Classes (Base)
+## 2. Classes (Base)
+
 | ID (Dec) | ID (Hex) | Class Name |
-| :--- | :--- | :--- |
-| **18** | 0x12 | Gladiator |
-| **20** | 0x14 | Marauder |
-| **19** | 0x13 | Pugilist |
-| **21** | 0x15 | Lancer |
-| **26** | 0x1A | Rogue |
-| **22** | 0x16 | Archer |
-| **24** | 0x18 | Thaumaturge |
-| **25** | 0x19 | Arcanist |
-| **23** | 0x17 | Conjurer |
+| :---: | :---: | :--- |
+| 18 | 0x12 | Gladiator |
+| 19 | 0x13 | Pugilist |
+| 20 | 0x14 | Marauder |
+| 21 | 0x15 | Lancer |
+| 22 | 0x16 | Archer |
+| 23 | 0x17 | Conjurer |
+| 24 | 0x18 | Thaumaturge |
+| 25 | 0x19 | Arcanist |
+| 26 | 0x1A | Rogue |
 
-## Generic Roles & Markers
+## 3. Generic Roles
 
-| ID (Dec) | ID (Hex) | Name | Type |
-| :--- | :--- | :--- | :--- |
-| **47** | 0x2F | Tank | Role Icon |
-| **48** | 0x30 | Tank 1 | Role Icon |
-| **49** | 0x31 | Tank 2 | Role Icon |
-| **50** | 0x32 | Healer | Role Icon |
-| **51** | 0x33 | Healer 1 | Role Icon |
-| **52** | 0x34 | Healer 2 | Role Icon |
-| **122** | 0x7A | Pure Healer | Role Icon |
-| **123** | 0x7B | Barrier Healer | Role Icon |
-| **53** | 0x35 | DPS | Role Icon |
-| **54** | 0x36 | DPS 1 | Role Icon |
-| **55** | 0x37 | DPS 2 | Role Icon |
-| **56** | 0x38 | DPS 3 | Role Icon |
-| **57** | 0x39 | DPS 4 | Role Icon |
-| **118** | 0x76 | Melee DPS | Role Icon |
-| **119** | 0x77 | Ranged DPS | Role Icon |
-| **120** | 0x78 | Physical Ranged DPS | Role Icon |
-| **121** | 0x79 | Magical Ranged DPS | Role Icon |
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 47 | 0x2F | Tank |
+| 48 | 0x30 | Tank 1 |
+| 49 | 0x31 | Tank 2 |
+| 50 | 0x32 | Healer |
+| 51 | 0x33 | Healer 1 |
+| 52 | 0x34 | Healer 2 |
+| 53 | 0x35 | DPS |
+| 54 | 0x36 | DPS 1 |
+| 55 | 0x37 | DPS 2 |
+| 56 | 0x38 | DPS 3 |
+| 57 | 0x39 | DPS 4 |
+| 118 | 0x76 | Melee DPS |
+| 119 | 0x77 | Ranged DPS |
+| 120 | 0x78 | Physical Ranged DPS |
+| 121 | 0x79 | Magical Ranged DPS |
+| 122 | 0x7A | Pure Healer |
+| 123 | 0x7B | Barrier Healer |
 
+---
 
-## Usage Note
-These IDs correspond to the values found in the `JOB-MAPPING` or `ATTACK-TYPES-MAPPING` block. To change an icon, locate the target object entry in this block and replace its ID.
+## 4. Attack Markers & Mechanics
 
-## Attack Markers & Mechanics
+| ID (Dec) | ID (Hex) | Name | Category | Notes |
+| :---: | :---: | :--- | :--- | :--- |
+| 1 | 0x01 | Line AOE | AOE | Params: H, W |
+| 9 | 0x09 | General Marker | Marker | |
+| 10 | 0x0A | Circle AOE | AOE | |
+| 11 | 0x0B | Fan AOE | AOE | Params: Arc |
+| 13 | 0x0D | Gaze | Mechanic | |
+| 14 | 0x0E | Stack | Marker | |
+| 15 | 0x0F | Line Stack | Marker | |
+| 16 | 0x10 | Proximity | AOE | |
+| 17 | 0x11 | Donut AOE | AOE | Params: R, Arc |
+| 106 | 0x6A | Stack (Multi-hit) | Marker | |
+| 107 | 0x6B | Proximity (Player) | Marker | |
+| 108 | 0x6C | Tankbuster (Single) | Marker | |
+| 109 | 0x6D | Radial Knockback | Mechanic | |
+| 110 | 0x6E | Linear Knockback | Mechanic | Params: Counts |
+| 111 | 0x6F | Tower | Mechanic | |
+| 112 | 0x70 | Targeting Indicator | Marker | |
+| 126 | 0x7E | Moving Circle AOE | Attack | |
+| 127 | 0x7F | 1-Person AOE | Attack | |
+| 128 | 0x80 | 2-Person AOE | Attack | |
+| 129 | 0x81 | 3-Person AOE | Attack | |
+| 130 | 0x82 | 4-Person AOE | Attack | |
 
-| ID (Dec) | ID (Hex) | Name | Type | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **130** | 0x82 | 4-Person AOE | Attack | |
-| **129** | 0x81 | 3-Person AOE | Attack | |
-| **128** | 0x80 | 2-Person AOE | Attack | |
-| **127** | 0x7F | 1-Person AOE | Attack | |
-| **126** | 0x7E | Moving Circle AOE | Attack | |
-| **112** | 0x70 | Targeting Indicator | Marker | |
-| **111** | 0x6F | Tower | Mechanic | |
-| **110** | 0x6E | Linear Knockback | Mechanic | Has Param (Count) |
-| **109** | 0x6D | Radial Knockback | Mechanic | |
-| **108** | 0x6C | Tankbuster (Single) | Marker | |
-| **107** | 0x6B | Proximity (Player) | Marker | |
-| **106** | 0x6A | Stack (Multi-hit) | Marker | |
-| **17** | 0x11 | Donut AOE | AOE | Params: Radius, Arc |
-| **16** | 0x10 | Proximity | AOE | |
-| **15** | 0x0F | Line Stack | Marker | |
-| **14** | 0x0E | Stack | Marker | |
-| **13** | 0x0D | Gaze | Mechanic | |
-| **1** | 0x01 | Line AOE | AOE | Params: Height, Width |
-| **11** | 0x0B | Fan AOE | AOE | Params: Arc |
-| **10** | 0x0A | Circle AOE | AOE | |
-| **9** | 0x09 | General Marker | Marker | |
+---
 
-## Extended Parameter Blocks
+## 5. Waymarks, Signs & Indicators
 
-Objects with custom properties (Size, Angle, Transparency) store these in dedicated blocks **after** the coordinate data. These follow a Type-Length-Value (TLV) concept but use fixed headers.
+### Waymarks
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 79 | 0x4F | Waymark A |
+| 80 | 0x50 | Waymark B |
+| 81 | 0x51 | Waymark C |
+| 82 | 0x52 | Waymark D |
+| 83 | 0x53 | Waymark 1 |
+| 84 | 0x54 | Waymark 2 |
+| 85 | 0x55 | Waymark 3 |
+| 86 | 0x56 | Waymark 4 |
 
-### Type 6 Block: Angle
-- **Header**: `06 00 01 00 [Count 2B]`
-- **Format**: `int16` (2 bytes, Little Endian) per object.
-- **Range**: 0-360 (degrees).
-- **Data Start**: Header Offset + 6.
+### Target Markers (Targeting & Shapes)
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 65 | 0x41 | Attack 1 |
+| 66 | 0x42 | Attack 2 |
+| 67 | 0x43 | Attack 3 |
+| 68 | 0x44 | Attack 4 |
+| 69 | 0x45 | Attack 5 |
+| 115 | 0x73 | Attack 6 |
+| 116 | 0x74 | Attack 7 |
+| 117 | 0x75 | Attack 8 |
+| 70 | 0x46 | Bind 1 |
+| 71 | 0x47 | Bind 2 |
+| 72 | 0x48 | Bind 3 |
+| 73 | 0x49 | Ignore 1 |
+| 74 | 0x4A | Ignore 2 |
+| 75 | 0x4B | Square |
+| 76 | 0x4C | Circle |
+| 77 | 0x4D | Plus |
+| 78 | 0x4E | Triangle |
 
-### Type 7 Block: Size
-- **Header**: `07 00 00 00 [Count 2B]`
-- **Format**: `byte` (1 byte) per object.
-- **Range**: 0-255 (100 = default size).
-- **Data Start**: Header Offset + 6.
+### Lock-on Markers
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 131 | 0x83 | Red Lock-on |
+| 132 | 0x84 | Blue Lock-on |
+| 133 | 0x85 | Purple Lock-on |
+| 134 | 0x86 | Green Lock-on |
 
-### Type 8 Block: Color/Transparency
-- **Header**: `08 00 02 00 [Count 2B]`
-- **Format**: 4 bytes per object (`[R] [G] [B] [Alpha]`).
-- **Data Start**: Header Offset + 6.
-- **Values**:
-  - **R, G, B**: Indexes 0-2. Typically `255 255 255` (White).
-  - **Alpha (Transparency)**: Index 3. 
-    - `0`: Default (Opaque, or not set?).
-    - `1-100`: Transparency percentage.
+### Enemies & Effects
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 113 | 0x71 | Enhancement Effect |
+| 114 | 0x72 | Enfeeblement Effect |
+| 60 | 0x3C | Small Enemy |
+| 62 | 0x3E | Medium Enemy |
+| 64 | 0x40 | Large Enemy |
+
+---
+
+## 6. Signs, Symbols & Fields
+
+### Field Objects
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 4 | 0x04 | Checkered Circle |
+| 8 | 0x08 | Checkered Square |
+| 124 | 0x7C | Grey Circle |
+| 125 | 0x7D | Grey Square |
+
+### Line & Arrows
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 12 | 0x0C | Line |
+| 94 | 0x5E | Up Arrow |
+
+### Rotation Symbols
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 103 | 0x67 | Rotate |
+| 139 | 0x8B | Rotate CW |
+| 140 | 0x8C | Rotate CCW |
+
+### Highlighted Shapes
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 135 | 0x87 | Highlighted Circle |
+| 136 | 0x88 | Highlighted X |
+| 137 | 0x89 | Highlighted Square |
+| 138 | 0x8A | Highlighted Triangle |
+
+### Standard Signs
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 87 | 0x57 | Circle |
+| 88 | 0x58 | X |
+| 89 | 0x59 | Triangle |
+| 90 | 0x5A | Square |
+
+### Text
+| ID (Dec) | ID (Hex) | Name |
+| :---: | :---: | :--- |
+| 100 | 0x64 | Text |
