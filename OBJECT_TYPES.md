@@ -64,5 +64,32 @@ This document catalogs the verified **Job and Role IDs** used in the FFXIV Strat
 | **120** | 0x78 | Physical Ranged DPS | Role Icon |
 | **121** | 0x79 | Magical Ranged DPS | Role Icon |
 
+
 ## Usage Note
-These IDs correspond to the values found in the `JOB-MAPPING` block. To change an icon, locate the target object entry in this block and replace its ID.
+These IDs correspond to the values found in the `JOB-MAPPING` or `ATTACK-TYPES-MAPPING` block. To change an icon, locate the target object entry in this block and replace its ID.
+
+## Attack Markers & Mechanics
+
+| ID (Dec) | ID (Hex) | Name | Type | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **130** | 0x82 | 4-Person AOE | Attack | |
+| **129** | 0x81 | 3-Person AOE | Attack | |
+| **128** | 0x80 | 2-Person AOE | Attack | |
+| **127** | 0x7F | 1-Person AOE | Attack | |
+| **126** | 0x7E | Moving Circle AOE | Attack | |
+| **112** | 0x70 | Targeting Indicator | Marker | |
+| **111** | 0x6F | Tower | Mechanic | |
+| **110** | 0x6E | Linear Knockback | Mechanic | Has Param (Count) |
+| **109** | 0x6D | Radial Knockback | Mechanic | |
+| **108** | 0x6C | Tankbuster (Single) | Marker | |
+| **107** | 0x6B | Proximity (Player) | Marker | |
+| **106** | 0x6A | Stack (Multi-hit) | Marker | |
+| **17** | 0x11 | Donut AOE | AOE | Params: Radius, Arc |
+| **16** | 0x10 | Proximity | AOE | |
+| **15** | 0x0F | Line Stack | Marker | |
+| **14** | 0x0E | Stack | Marker | |
+| **13** | 0x0D | Gaze | Mechanic | |
+| **1** | 0x01 | Line AOE | AOE | Params: Height, Width |
+| **11** | 0x0B | Fan AOE | AOE | Params: Arc |
+| **10** | 0x0A | Circle AOE | AOE | |
+| **9** | 0x09 | General Marker | Marker | |
