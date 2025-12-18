@@ -17,9 +17,9 @@ import {
     Field,
     MessageBar,
     MessageBarBody,
-    Textarea,
     Toast,
     ToastTitle,
+    Textarea,
     makeStyles,
     useToastController,
 } from '@fluentui/react-components';
@@ -60,6 +60,9 @@ const useStyles = makeStyles({
         fontFamily: 'monospace',
         borderCollapse: 'collapse',
     },
+    tabList: {
+        marginBottom: '12px',
+    },
 });
 
 export const GameCodeExportButton: React.FC<GameCodeExportButtonProps> = ({ children }) => {
@@ -81,6 +84,8 @@ const GameCodeExportDialogBody: React.FC = () => {
     const { canonicalScene } = useScene();
     const currentStep = 0; // Default to first step
     const { dispatchToast } = useToastController();
+
+    // State
     const [exportTitle, setExportTitle] = useState('XIVPlan Export');
     const [showDebug, setShowDebug] = useState(false);
 
@@ -190,9 +195,6 @@ const GameCodeExportDialogBody: React.FC = () => {
                                     <th style={{ textAlign: 'left', padding: '4px' }}>Type</th>
                                     <th style={{ textAlign: 'left', padding: '4px' }}>Name</th>
                                     <th style={{ textAlign: 'right', padding: '4px' }}>GameID</th>
-                                    <th style={{ textAlign: 'right', padding: '4px' }}>X</th>
-                                    <th style={{ textAlign: 'right', padding: '4px' }}>Y</th>
-                                    <th style={{ textAlign: 'right', padding: '4px' }}>Rot</th>
                                     <th style={{ textAlign: 'right', padding: '4px' }}>Scale</th>
                                     <th style={{ textAlign: 'right', padding: '4px' }}>A</th>
                                     <th style={{ textAlign: 'right', padding: '4px' }}>B</th>
@@ -204,9 +206,6 @@ const GameCodeExportDialogBody: React.FC = () => {
                                         <td style={{ padding: '4px' }}>{obj.originalType}</td>
                                         <td style={{ padding: '4px' }}>{obj.originalName || '-'}</td>
                                         <td style={{ padding: '4px', textAlign: 'right' }}>0x{obj.gameTypeId.toString(16).toUpperCase()}</td>
-                                        <td style={{ padding: '4px', textAlign: 'right' }}>{obj.x}</td>
-                                        <td style={{ padding: '4px', textAlign: 'right' }}>{obj.y}</td>
-                                        <td style={{ padding: '4px', textAlign: 'right' }}>{obj.rotation}</td>
                                         <td style={{ padding: '4px', textAlign: 'right' }}>{obj.scale}</td>
                                         <td style={{ padding: '4px', textAlign: 'right' }}>{obj.paramA}</td>
                                         <td style={{ padding: '4px', textAlign: 'right' }}>{obj.paramB}</td>

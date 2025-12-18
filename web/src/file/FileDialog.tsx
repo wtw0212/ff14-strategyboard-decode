@@ -17,9 +17,10 @@ import { TabActivity } from '../TabActivity';
 import { FileSystemNotSupportedMessage, OpenFileSystem, SaveFileSystem } from './FileDialogFileSystem';
 import { OpenLocalStorage, SaveLocalStorage } from './FileDialogLocalStorage';
 import { ImportFromString } from './FileDialogShare';
+import { ImportGameStrategy } from './FileDialogGameStrategy';
 import { supportsFs } from './filesystem';
 
-type Tabs = 'file' | 'localStorage' | 'import' | 'fileUnsupported';
+type Tabs = 'file' | 'localStorage' | 'import' | 'importStrategy' | 'fileUnsupported';
 
 export type OpenDialogProps = Omit<DialogProps, 'children'>;
 
@@ -43,6 +44,7 @@ export const OpenDialog: React.FC<OpenDialogProps> = (props) => {
                             {supportsFs && <Tab value="file">Local file</Tab>}
                             <Tab value="localStorage">Browser storage</Tab>
                             <Tab value="import">Import plan link</Tab>
+                            <Tab value="importStrategy">Import Game Strategy</Tab>
                             {!supportsFs && <Tab value="fileUnsupported">Local file</Tab>}
                         </TabList>
                         <TabActivity value="file" activeTab={tab}>
@@ -53,6 +55,9 @@ export const OpenDialog: React.FC<OpenDialogProps> = (props) => {
                         </TabActivity>
                         <TabActivity value="import" activeTab={tab}>
                             <ImportFromString actions={portalNode} />
+                        </TabActivity>
+                        <TabActivity value="importStrategy" activeTab={tab}>
+                            <ImportGameStrategy actions={portalNode} />
                         </TabActivity>
                         <TabActivity value="fileUnsupported" activeTab={tab}>
                             <FileSystemNotSupportedMessage actions={portalNode} />

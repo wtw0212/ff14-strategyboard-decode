@@ -528,12 +528,19 @@ export const DEFAULT_RADIAL_TICKS: RadialTicks = {
 // Game canvas size: 512x384, no padding for direct coordinate mapping
 export const DEFAULT_ARENA_PADDING = 0;
 
+// Game canvas grid: 8 columns × 6 rows = 64px per cell
+export const DEFAULT_GAME_GRID: RectangularGrid = {
+    type: GridType.Rectangular,
+    rows: 6,
+    columns: 8,
+};
+
 export const DEFAULT_ARENA: Arena = {
     shape: ArenaShape.Rectangle,
     width: 512,
     height: 384,
     padding: 0,
-    grid: NO_GRID,
+    grid: DEFAULT_GAME_GRID,
 };
 
 export const DEFAULT_SCENE: Scene = {

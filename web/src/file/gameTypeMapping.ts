@@ -30,7 +30,7 @@ import {
     PartyObject,
     EnemyObject,
 } from '../scene';
-import { encodeStrategy } from './gameStrategyCodec';
+import { encodeStrategy, decodeStrategy } from './gameStrategyCodec';
 
 // ============================================================================
 // Game Type IDs (from OBJECT_TYPES.md)
@@ -247,6 +247,7 @@ export interface GameObject {
     rotation: number;
     scale: number;
     color: [number, number, number];
+    transparency: number;
     paramA: number;
     paramB: number;
     paramC: number;
@@ -334,6 +335,7 @@ function convertObject(
         rotation: Math.round(rotation),
         scale: 100, // Default size
         color,
+        transparency: 100 - (obj.opacity ?? 100), // Map opacity (100=visible) to transparency (0=visible)
         paramA: 0,
         paramB: 0,
         paramC: 0,
@@ -385,7 +387,8 @@ function convertObject(
                 return null;
         }
         if (isRadiusObject(obj) && (obj.type === ObjectType.Circle || obj.type === ObjectType.Proximity || obj.type === ObjectType.Knockback)) {
-            gameObj.scale = Math.round((obj.radius / 60) * 100); // Normalize to game scale
+            // Game scale formula: size = radius / 2.47 (observed ratio: radius_pixels = size * 2.47)
+            gameObj.scale = Math.round(obj.radius / 2.47);
         }
         return gameObj;
     }
@@ -416,6 +419,9 @@ function convertObject(
     }
 
     if (isRectangleZone(obj)) {
+        // Rectangle zones use paramA for width and paramB for length
+        gameObj.paramA = Math.round(obj.width);
+        gameObj.paramB = Math.round(obj.height);
         switch (obj.type) {
             case ObjectType.Rect:
             case ObjectType.LineStack:
@@ -438,7 +444,8 @@ function convertObject(
     if (isEye(obj)) {
         gameObj.typeId = GAME_TYPES.gaze;
         if (isRadiusObject(obj)) {
-            gameObj.scale = Math.round((obj.radius / 60) * 100);
+            // Game scale formula: size = radius / 2.47 (observed ratio: radius_pixels = size * 2.47)
+            gameObj.scale = Math.round(obj.radius / 2.47);
         }
         return gameObj;
     }
@@ -447,7 +454,8 @@ function convertObject(
     if (isStarburstZone(obj)) {
         gameObj.typeId = GAME_TYPES.tower;
         if (isRadiusObject(obj)) {
-            gameObj.scale = Math.round((obj.radius / 60) * 100);
+            // Game scale formula: size = radius / 2.47 (observed ratio: radius_pixels = size * 2.47)
+            gameObj.scale = Math.round(obj.radius / 2.47);
         }
         return gameObj;
     }
@@ -555,7 +563,7 @@ export function generateStrategyBinary(title: string, objects: GameObject[]): Ui
     content.push(0x08, 0x00, 0x02, 0x00); // Block header
     content.push(num & 0xff, (num >> 8) & 0xff); // Count
     for (const obj of objects) {
-        content.push(obj.color[0], obj.color[1], obj.color[2], 0x00);
+        content.push(obj.color[0], obj.color[1], obj.color[2], obj.transparency || 0);
     }
 
     // PARAM A, B, C blocks: uint16 per object
@@ -592,6 +600,274 @@ export function generateStrategyBinary(title: string, objects: GameObject[]): Ui
     binary.set(contentBytes, 28 + titlePadded.length);
 
     return binary;
+}
+
+// ============================================================================
+// Strategy Import (Binary to Scene)
+// ============================================================================
+
+/**
+ * Convert Game Code to XIVPlan Scene
+ */
+export function gameCodeToScene(code: string): Scene {
+    // 1. Decode base64/compression
+    const binary = decodeStrategy(code);
+
+    // 2. Parse binary to GameObjects
+    const gameObjects = parseStrategyBinary(binary);
+
+    // 3. Convert GameObjects to SceneObjects
+    const sceneObjects: SceneObject[] = [];
+
+    // Create reverse mapping for types
+    const ID_TO_GAME_TYPE: Record<number, string> = {};
+    for (const [key, value] of Object.entries(GAME_TYPES)) {
+        ID_TO_GAME_TYPE[value] = key;
+    }
+    // Add markers
+    for (const [key, value] of Object.entries(WAYMARK_NAME_TO_ID)) {
+        ID_TO_GAME_TYPE[value] = key;
+    }
+    for (const [key, value] of Object.entries(MARKER_NAME_TO_ID)) {
+        ID_TO_GAME_TYPE[value] = key;
+    }
+
+    for (const gameObj of gameObjects) {
+        const sceneObj = convertGameToSceneObject(gameObj, ID_TO_GAME_TYPE);
+        if (sceneObj) {
+            sceneObjects.push(sceneObj);
+        }
+    }
+
+    // 4. Construct Scene
+    return {
+        nextId: sceneObjects.length + 1,
+        arena: {
+            shape: 'rectangle',
+            width: 512,
+            height: 384,
+            padding: 0,
+            grid: { type: 'rectangular', rows: 6, columns: 8 }
+        } as any, // Cast to avoid import circular dependency issues if types differ slightly
+        steps: [{ objects: sceneObjects }],
+    };
+}
+
+function parseStrategyBinary(binary: Uint8Array): GameObject[] {
+    const view = new DataView(binary.buffer);
+    let offset = 28; // Header size
+
+    // Read Title Length from header
+    const titleLen = view.getUint16(26, true);
+    offset += titleLen;
+
+    const objects: GameObject[] = [];
+
+    // 1. Parse TYPE blocks (start of content)
+    // Structure: 02 00 [ID] 00
+    while (offset < binary.length) {
+        if (view.getUint8(offset) !== 0x02) break; // Not a type block
+
+        const typeId = view.getUint16(offset + 2, true);
+        objects.push({
+            typeId,
+            x: 0,
+            y: 0,
+            rotation: 0,
+            scale: 100,
+            color: [255, 255, 255],
+            transparency: 0,
+            paramA: 0,
+            paramB: 0,
+            paramC: 0
+        });
+        offset += 4;
+    }
+
+    const num = objects.length;
+
+    // 2. Parse remaining blocks
+    while (offset < binary.length) {
+        const blockId = view.getUint8(offset);
+        if (blockId === 0x03) break; // Footer
+
+        // Standard block header: [ID] 00 [SUB] 00 [COUNT] 00
+        // But count is at offset+4 (2 bytes)
+        // const count = view.getUint16(offset + 4, true); // Unused
+        const dataStart = offset + 6;
+        let blockSize = 6; // Header size
+
+        // Calculate block data size
+        switch (blockId) {
+            case 0x04: // Layer (2 bytes per obj)
+                blockSize += num * 2;
+                break;
+            case 0x05: // Coords (4 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const x = view.getInt16(dataStart + i * 4, true);
+                    const y = view.getInt16(dataStart + i * 4 + 2, true);
+                    const obj = objects[i];
+                    if (obj) {
+                        obj.x = x / 10;
+                        obj.y = y / 10;
+                    }
+                }
+                blockSize += num * 4;
+                break;
+            case 0x06: // Angle (2 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const angle = view.getUint16(dataStart + i * 2, true);
+                    const obj = objects[i];
+                    if (obj) obj.rotation = angle;
+                }
+                blockSize += num * 2;
+                break;
+            case 0x07: // Size (1 byte per obj + padding)
+                for (let i = 0; i < num; i++) {
+                    const scale = view.getUint8(dataStart + i);
+                    const obj = objects[i];
+                    if (obj) obj.scale = scale;
+                }
+                blockSize += num;
+                if (num % 2 === 1) blockSize += 1; // Padding
+                break;
+            case 0x08: // Transparency/Color (4 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const r = view.getUint8(dataStart + i * 4);
+                    const g = view.getUint8(dataStart + i * 4 + 1);
+                    const b = view.getUint8(dataStart + i * 4 + 2);
+                    const t = view.getUint8(dataStart + i * 4 + 3);
+                    const obj = objects[i];
+                    if (obj) {
+                        obj.color = [r, g, b];
+                        obj.transparency = t;
+                    }
+                }
+                blockSize += num * 4;
+                break;
+            case 0x0A: // Param A (2 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const val = view.getUint16(dataStart + i * 2, true);
+                    const obj = objects[i];
+                    if (obj) obj.paramA = val;
+                }
+                blockSize += num * 2;
+                break;
+            case 0x0B: // Param B (2 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const val = view.getUint16(dataStart + i * 2, true);
+                    const obj = objects[i];
+                    if (obj) obj.paramB = val;
+                }
+                blockSize += num * 2;
+                break;
+            case 0x0C: // Param C (2 bytes per obj)
+                for (let i = 0; i < num; i++) {
+                    const val = view.getUint16(dataStart + i * 2, true);
+                    const obj = objects[i];
+                    if (obj) obj.paramC = val;
+                }
+                blockSize += num * 2;
+                break;
+            default:
+                break;
+        }
+
+        offset += blockSize;
+    }
+
+    return objects;
+}
+
+function convertGameToSceneObject(gameObj: GameObject, idMap: Record<number, string>): SceneObject | null {
+    const typeName = idMap[gameObj.typeId];
+    if (!typeName) return null;
+
+    const base = {
+        id: Math.floor(Math.random() * 100000000), // Numeric ID
+        type: ObjectType.Undefined,
+        x: gameObj.x,
+        y: gameObj.y,
+        rotation: gameObj.rotation,
+        opacity: Math.max(0, 100 - gameObj.transparency),
+        color: `#${gameObj.color.map(c => c.toString(16).padStart(2, '0')).join('')}`
+    };
+
+    // Helper to calc radius
+    const getRadius = () => Math.round(gameObj.scale * 2.47);
+
+    // Map Types
+
+    // 1. Circle AOE
+    if (gameObj.typeId === GAME_TYPES.circle_aoe) {
+        return { ...base, type: ObjectType.Circle, radius: getRadius() } as any;
+    }
+    // 2. Fan AOE (Cone)
+    if (gameObj.typeId === GAME_TYPES.fan_aoe) {
+        return {
+            ...base,
+            type: ObjectType.Cone,
+            radius: getRadius(),
+            degree: gameObj.paramA
+        } as any;
+    }
+    // 3. Donut
+    if (gameObj.typeId === GAME_TYPES.donut_aoe) {
+        return {
+            ...base,
+            type: ObjectType.Donut,
+            radius: getRadius(),
+            innerRadius: Math.round(gameObj.paramB / 2.47)
+        } as any;
+    }
+    // 4. Line/Rect
+    if (gameObj.typeId === GAME_TYPES.line_aoe) {
+        // Line AOE params: Width (A), Height (B)
+        // XIVPlan Rect: width, height
+        return {
+            ...base,
+            type: ObjectType.Rect,
+            width: Math.round(gameObj.paramA / 2.47),
+            height: Math.round(gameObj.paramB / 2.47)
+        } as any;
+    }
+    // 5. Mechanics
+    if (gameObj.typeId === GAME_TYPES.stack) {
+        return { ...base, type: ObjectType.Stack, radius: getRadius() } as any;
+    }
+    if (gameObj.typeId === GAME_TYPES.tower) {
+        return { ...base, type: ObjectType.Tower, radius: getRadius() } as any;
+    }
+    if (gameObj.typeId === GAME_TYPES.gaze) {
+        return { ...base, type: ObjectType.Eye, radius: getRadius() } as any;
+    }
+    if (gameObj.typeId === GAME_TYPES.proximity) {
+        return { ...base, type: ObjectType.Proximity, radius: getRadius() } as any;
+    }
+    if (gameObj.typeId === GAME_TYPES.radial_knockback) {
+        return { ...base, type: ObjectType.Knockback, radius: getRadius() } as any;
+    }
+    if (gameObj.typeId === GAME_TYPES.linear_knockback) {
+        return { ...base, type: ObjectType.LineKnockback, width: 20, height: 60 } as any; // Approximate defaults
+    }
+
+    // 6. Jobs/Roles (Party)
+    // Check if name is a job
+    if (gameObj.typeId >= 0x1B && gameObj.typeId <= 0x39) { // Job ID range roughly
+        // e.g. "paladin", "white_mage"
+        const jobName = typeName.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+        return { ...base, type: ObjectType.Party, name: jobName } as any;
+    }
+
+    // 7. Marker
+    if (gameObj.typeId >= 0x4F && gameObj.typeId <= 0x56) { // Waymarks
+        // typeName is 'waymark a' etc.
+        const markerChar = typeName.replace('waymark ', '').toUpperCase();
+        return { ...base, type: ObjectType.Marker, name: markerChar } as any;
+    }
+
+    // Default fallback
+    return null;
 }
 
 /**

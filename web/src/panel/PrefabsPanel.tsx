@@ -48,12 +48,10 @@ import { ZoneLineKnockback } from '../prefabs/zone/ZoneLineKnockback';
 import { ZoneLineStack } from '../prefabs/zone/ZoneLineStack';
 import { ZoneProximity } from '../prefabs/zone/ZoneProximity';
 import { ZoneSquare } from '../prefabs/zone/ZoneRectangle';
-import { ZoneRightTriangle } from '../prefabs/zone/ZoneRightTriangle';
 import { ZoneRotateClockwise, ZoneRotateCounterClockwise } from '../prefabs/zone/ZoneRotate';
 import { ZoneStack } from '../prefabs/zone/ZoneStack';
 import { ZoneStarburst } from '../prefabs/zone/ZoneStarburst';
 import { ZoneTower } from '../prefabs/zone/ZoneTower';
-import { ZoneTriangle } from '../prefabs/zone/ZoneTriangle';
 import { useControlStyles } from '../useControlStyles';
 import { ObjectGroup, Section } from './Section';
 
@@ -64,8 +62,6 @@ export const PrefabsPanel: React.FC = () => {
         <div className={controlClasses.panel}>
             <Section title="Zones">
                 <ObjectGroup>
-                    <ZoneRightTriangle />
-                    <ZoneTriangle />
                     <ZoneSquare />
                     <ZoneLine />
                     <ZoneDonut />

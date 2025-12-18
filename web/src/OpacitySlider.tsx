@@ -33,13 +33,16 @@ export const OpacitySlider: React.FC<OpacitySliderProps> = ({
 }) => {
     const classes = useStyles();
 
-    const valueText = value === undefined ? '' : `${value}%`;
-    const ariaValueText = value === undefined ? '' : `${value} percent`;
+    const transparency = 100 - (value ?? 100);
+    const valueText = `${transparency}%`;
+    const ariaValueText = `${transparency} percent`;
 
     const [dragging, setDragging] = useState(false);
 
     const handleChange: SliderProps['onChange'] = (ev, data) => {
-        onChange?.(ev, { ...data, transient: dragging });
+        // Convert transparency back to opacity
+        const newOpacity = 100 - data.value;
+        onChange?.(ev, { ...data, value: newOpacity, transient: dragging });
     };
 
     const handleMouseDown: SliderProps['onMouseDown'] = (ev) => {
@@ -54,11 +57,11 @@ export const OpacitySlider: React.FC<OpacitySliderProps> = ({
     };
 
     return (
-        <Field label={label ?? 'Opacity'} className={className}>
+        <Field label={label ?? 'Transparency'} className={className}>
             <div className={classes.wrapper}>
                 <Slider
-                    value={value ?? 0}
-                    min={5}
+                    value={transparency}
+                    min={0}
                     max={100}
                     step={5}
                     aria-valuetext={ariaValueText}
