@@ -31,10 +31,28 @@ To transform the binary data into a shareable string, the system employs the fol
 
 ## Library Usage
 
-The provided `ff14_strategy` module exposes functions for the full encode/decode cycle and coordinate manipulation.
+The provided `ff14_strategy_pack` module exposes functions for the full encode/decode cycle, coordinate manipulation, and **strategy generation**.
 
 ### Dependencies
 The library utilizes only standard Python libraries (`zlib`, `base64`, `struct`) and requires no external dependencies.
+
+### Example: Generating a Strategy
+```python
+import sys
+sys.path.insert(0, 'ff14_strategy_pack')
+from strategy_generator import generate_strategy
+
+# Generate a Light Party with Circle AOE
+objects = [
+    ("tank", 180, 120),
+    ("healer", 330, 120),
+    ("ninja", 180, 260),
+    ("bard", 330, 260),
+    ("circle_aoe", 256, 192),
+]
+code = generate_strategy("Light Party", objects)
+print(code)
+```
 
 ### Example: Decoding a Strategy
 ```python
@@ -67,6 +85,7 @@ Analysis of multi-object strategies reveals that the binary structure interleave
 - The coordinate block typically begins after the metadata block.
 - The offset for the coordinate block shifts dynamically based on the number of objects, generally increasing by 10 bytes (6 bytes metadata + 4 bytes coordinates) per additional object.
 - Object types can be modified by altering the first 2 bytes of the corresponding metadata block.
+- **Title Alignment**: Header(28) + TitleLen must be a multiple of 4 bytes.
 
 ## Development Roadmap
 
@@ -78,12 +97,19 @@ This project represents the foundational layer of a broader initiative to enable
 - [x] Implementation of the Zlib compression pipeline (Level 6).
 - [x] Verification of the encode/decode cycle using live game data.
 
-### Phase 2: Object Type Quantification [In Progress]
+### Phase 2: Object Type Quantification [Completed]
 - [x] Identification of the metadata block structure (Type ID locations).
-- [ ] Comprehensive mapping of all available Type IDs (e.g., Tank, Healer, DPS, Waymarks) to their respective binary values.
-- [ ] Analysis of auxiliary data fields within the metadata block.
+- [x] Comprehensive mapping of all available Type IDs (see `OBJECT_TYPES.md`).
+- [x] Analysis of auxiliary data fields within the metadata block.
+- [x] Color palette mapping (see `ColourPalette.md`).
 
-### Phase 3: Web Integration [Pending]
+### Phase 3: Strategy Generation [Completed]
+- [x] Implementation of `strategy_generator.py` for programmatic code generation.
+- [x] Support for custom colors (RGB tuple or palette lookup).
+- [x] Verified generation of 50+ object strategies.
+- [x] 4-byte title alignment fix for reliable code generation.
+
+### Phase 4: Web Integration [Pending]
 The ultimate objective is to facilitate the generation of strategy codes directly from a web-based drawing interface.
 - [ ] Development of a frontend interface for tactical diagramming.
 - [ ] Implementation of a coordinate mapping system to translate web canvas coordinates to the game's internal coordinate space ($x \times 10$).
