@@ -1,120 +1,161 @@
 # FF14 Strategy Board Codec
 
+> **⚠️ ALPHA STATUS**: This project is under active development. Object type mappings are incomplete, and exported strategy codes may not render correctly in-game. Contributions and bug reports are welcome.
+
 ## Abstract
 
-This repository provides a Python implementation of the encoding and decoding algorithms utilized by the Final Fantasy XIV (FFXIV) Strategy Board system. Through reverse engineering of the game client, the underlying serialization format, compression scheme, and obfuscation layers have been identified and replicated. This library enables the programmatic generation, parsing, and modification of strategy codes, facilitating external tool development and tactical planning analysis.
+This repository provides a Python implementation of the encoding and decoding algorithms utilized by the Final Fantasy XIV (FFXIV) Strategy Board system. Through reverse engineering of the game client, the underlying serialization format, compression scheme, and obfuscation layers have been identified and replicated. Additionally, a web-based interface enables visual diagram creation with direct export to in-game strategy codes.
+
+## Repository Structure
+
+```
+ff14-stratboard-decode/
+├── ff14_strategy_pack/      # Python codec library
+│   ├── ff14_strategy.py     # Core encode/decode functions
+│   └── strategy_generator.py # Programmatic strategy generation
+├── docs/
+│   ├── OBJECT_TYPES.md      # Comprehensive Type ID mapping
+│   └── ColourPalette.md     # Color palette reference
+└── web/                     # XIVPlan fork with game export
+    └── src/
+        └── file/
+            ├── gameStrategyCodec.ts    # TypeScript codec port
+            └── gameTypeMapping.ts      # XIVPlan → Game type conversion
+```
+
+---
 
 ## Technical Specification
 
-The strategy code format follows a multi-layer encoding pipeline designed to obfuscate the underlying binary data. The processing stages are as follows:
+### Binary Serialization Format
 
-### 1. Serialization Format
-The core data is typically a binary structure containing:
-- **Header**: Version identifiers and total data length.
-- **Object Metadata Blocks**: A sequence of 6-byte blocks defining object types and properties.
-  - Bytes 0-1: Type ID (e.g., 0x0035 for Tank, 0x0004 for Healer, 0x0001/0x0005 for DPS).
-  - Bytes 2-5: Additional configuration data.
-- **Coordinate Blocks**: A sequence of 4-byte blocks defining spatial positions.
-  - Bytes 0-1: X-coordinate (int16).
-  - Bytes 2-3: Y-coordinate (int16).
-  - Coordinate values are scaled by a factor of 10 (e.g., a coordinate of 100.0 is stored as 1000).
-- **Footer**: Additional control bytes and termination sequences.
+The strategy code format follows a multi-layer encoding pipeline designed to obfuscate the underlying binary data.
 
-### 2. Encoding Pipeline
-To transform the binary data into a shareable string, the system employs the following steps:
-1.  **Compression**: The binary payload is compressed using the DEFLATE algorithm (Zlib) with a compression level of 6. This aligns with the specific Zlib header (`0x78 0x9c`) expected by the game client.
-2.  **Checksumming**: A custom structure consisting of a CRC32 checksum and the uncompressed length is prepended to the compressed payload.
-3.  **Base64 Encoding**: The data is encoded using a standard Base64 alphabet, which is subsequently modified to a URL-safe variant (replacing `+` with `-` and `/` with `_`).
-4.  **Obfuscation**: A stream cipher-like transformation is applied where each character's value is shifted based on its index and a randomized seed.
-5.  **Substitution**: A monoalphabetic substitution cipher is applied using a static lookup table extracted from the game memory.
-6.  **Formatting**: The final string is prefixed with a version identifier and the seed character, wrapped in specific delimiters (e.g., `[stgy:a...]`).
+#### Data Structure
+| Component | Size | Description |
+|-----------|------|-------------|
+| Header | 28 bytes | Version, length, object count, title length |
+| Title | Variable (4-byte aligned) | UTF-8 encoded string, padded to 4-byte boundary |
+| Type Block | 6 bytes/object | Object type IDs (uint16) |
+| Coordinate Block | 4 bytes/object | X, Y positions (int16 × 10) |
+| Additional Blocks | Variable | Scale, rotation, color, parameters |
+| Footer | 8 bytes | Termination sequence |
 
-## Library Usage
+#### Encoding Pipeline
+1. **Compression**: DEFLATE (Zlib Level 6), header `0x78 0x9c`.
+2. **Checksumming**: CRC32 + uncompressed length prepended.
+3. **Base64**: URL-safe variant (`+` → `-`, `/` → `_`).
+4. **Obfuscation**: Index-based character shifting with random seed.
+5. **Substitution**: Static monoalphabetic cipher.
+6. **Formatting**: `[stgy:a...]` wrapper with version/seed prefix.
 
-The provided `ff14_strategy_pack` module exposes functions for the full encode/decode cycle, coordinate manipulation, and **strategy generation**.
+---
+
+## Python Library
 
 ### Dependencies
-The library utilizes only standard Python libraries (`zlib`, `base64`, `struct`) and requires no external dependencies.
+Standard library only: `zlib`, `base64`, `struct`.
 
-### Example: Generating a Strategy
+### Example: Strategy Generation
 ```python
-import sys
-import os
-sys.path.append(os.path.abspath('ff14_strategy_pack'))
 from ff14_strategy_pack.strategy_generator import generate_strategy
 
-# Generate a Light Party with Circle AOE
 objects = [
     ("tank", 180, 120),
     ("healer", 330, 120),
-    ("ninja", 180, 260),
-    ("bard", 330, 260),
     ("circle_aoe", 256, 192),
 ]
-code = generate_strategy("Light Party", objects)
+code = generate_strategy("Example Strategy", objects)
 print(code)
 ```
 
-### Example: Decoding a Strategy
+### Example: Decoding
 ```python
 from ff14_strategy_pack.ff14_strategy import decode_strategy
-
-# Step 1: Decode the strategy string to binary
-strategy_code = "[stgy:a...]"
-binary_data = decode_strategy(strategy_code)
-
-# Step 2: Analyze binary content (e.g., read header)
 import struct
-version = struct.unpack('<I', binary_data[0:4])[0]
-print(f"Strategy Version: {version}")
+
+binary = decode_strategy("[stgy:a...]")
+version = struct.unpack('<I', binary[0:4])[0]
+print(f"Version: {version}")
 ```
 
-### Example: Modifying Coordinates
-```python
-from ff14_strategy_pack.ff14_strategy import modify_coordinates
+---
 
-# Move the first object (index 0) to coordinates (100.0, 100.0)
-original_code = "[stgy:a...]"
-new_code = modify_coordinates(original_code, 0, 100.0, 100.0)
+## Web Interface
 
-print(f"New Code: {new_code}")
+The `/web` directory contains a modified fork of [XIVPlan](https://github.com/joelspadin/xivplan) with in-game strategy code export capabilities.
+
+### System Configuration
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| Canvas Size | 512 × 384 px | Matches in-game strategy board |
+| Coordinate Origin | Top-left (0, 0) | +X right, +Y down |
+| Coordinate Scale | ×10 | Game stores 100.0 as 1000 |
+
+### Supported Object Types
+| Category | Types |
+|----------|-------|
+| Party Members | All jobs, generic roles (Tank, Healer, DPS, Melee, Ranged) |
+| Enemies | Small, Medium, Large, Huge, Circle |
+| Zones | Circle, Line, Cone, Donut, Arc, Stack, Tower, Eye, Starburst |
+| Markers | Waymarks A–D, 1–4, Arrow |
+| Mechanics | Knockback, Proximity |
+
+### Unsupported (Removed from UI)
+- Tethers (all types)
+- Polygon zones
+- Exaflare zones
+
+### Running Locally
+```bash
+cd web
+npm install
+npm run dev
 ```
 
-## Structure Analysis Notes
+---
 
-Analysis of multi-object strategies reveals that the binary structure interleaves metadata and coordinate blocks. For a strategy with $N$ objects:
-- The coordinate block typically begins after the metadata block.
-- The offset for the coordinate block shifts dynamically based on the number of objects, generally increasing by 10 bytes (6 bytes metadata + 4 bytes coordinates) per additional object.
-- Object types can be modified by altering the first 2 bytes of the corresponding metadata block.
-- **Title Alignment**: Header(28) + TitleLen must be a multiple of 4 bytes.
+## Development Status
 
-## Development Roadmap
+### Phase 1: Core Codec [Complete]
+- Binary format reverse engineering
+- Substitution cipher derivation
+- Zlib compression pipeline
+- Encode/decode cycle verification
 
-This project represents the foundational layer of a broader initiative to enable external creation and importation of tactical diagrams. The current development status and future objectives are outlined below.
+### Phase 2: Type Quantification [Complete]
+- Metadata block structure identification
+- Type ID mapping (see `docs/OBJECT_TYPES.md`)
+- Color palette mapping (see `docs/ColourPalette.md`)
 
-### Phase 1: Core Codec Implementation [Completed]
-- [x] Reverse engineering of the binary serialization format.
-- [x] Derivation of the substitution cipher and obfuscation algorithms.
-- [x] Implementation of the Zlib compression pipeline (Level 6).
-- [x] Verification of the encode/decode cycle using live game data.
+### Phase 3: Strategy Generation [Complete]
+- Programmatic code generation
+- Custom color support (RGB / palette)
+- 4-byte title alignment fix
 
-### Phase 2: Object Type Quantification [Completed]
-- [x] Identification of the metadata block structure (Type ID locations).
-- [x] Comprehensive mapping of all available Type IDs (see `docs/OBJECT_TYPES.md`).
-- [x] Analysis of auxiliary data fields within the metadata block.
-- [x] Color palette mapping (see `docs/ColourPalette.md`).
+### Phase 4: Web Integration [Alpha]
+- Modified XIVPlan fork
+- 512×384 canvas with top-left origin
+- "Export to Game" functionality
+- Debug mode for conversion inspection
 
-### Phase 3: Strategy Generation [Completed]
-- [x] Implementation of `ff14_strategy_pack/strategy_generator.py` for programmatic code generation.
-- [x] Support for custom colors (RGB tuple or palette lookup).
-- [x] Verified generation of 50+ object strategies.
-- [x] 4-byte title alignment fix for reliable code generation.
+### Known Limitations (Alpha)
+- [ ] Incomplete scale/size mapping for zones
+- [ ] Some zone types may export with incorrect parameters
+- [ ] Rotation values may differ from in-game behavior
+- [ ] Text objects not fully tested
+- [ ] Enemy hitbox sizes need calibration
 
-### Phase 4: Web Integration [Pending]
-The ultimate objective is to facilitate the generation of strategy codes directly from a web-based drawing interface.
-- [ ] Development of a frontend interface for tactical diagramming.
-- [ ] Implementation of a coordinate mapping system to translate web canvas coordinates to the game's internal coordinate space ($x \times 10$).
-- [ ] Integration of the Python codec (via backend service or Wasm port) to serialize web data into valid strategy strings for game importation.
+---
+
+## Credits
+
+- **Original XIVPlan**: [Joel Spadin](https://github.com/joelspadin/xivplan)
+- **Undo/Redo Logic**: [frontendphil/react-undo-redo](https://github.com/frontendphil/react-undo-redo)
+- **Arena Images**: [kotarou3/ffxiv-arena-images](https://github.com/kotarou3/ffxiv-arena-images)
+- **Limit Cut Icons**: [yullanellis](https://magentalava.gumroad.com/l/limitcuticons)
+
+Job, role, waymark, and enemy icons are © SQUARE ENIX CO., LTD. All Rights Reserved.
 
 ## License
 
