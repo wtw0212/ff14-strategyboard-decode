@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/lib/Node';
-import React, { PropsWithChildren, RefAttributes, useContext, useState } from 'react';
+import React, { PropsWithChildren, RefAttributes, useContext, useState, useCallback } from 'react';
 import { Layer, Stage } from 'react-konva';
 import { DefaultCursorProvider } from '../DefaultCursorProvider';
 import { getDropAction } from '../DropHandler';
@@ -12,6 +12,7 @@ import { Scene } from '../scene';
 import { selectNewObjects, selectNone, useSelection } from '../selection';
 import { UndoContext } from '../undo/undoContext';
 import { usePanelDrag } from '../usePanelDrag';
+import { useZoom, ZOOM_STEP, MIN_ZOOM, MAX_ZOOM } from '../ZoomContext';
 import { ArenaRenderer } from './ArenaRenderer';
 import { DrawTarget } from './DrawTarget';
 import { ObjectRenderer } from './ObjectRenderer';
@@ -24,6 +25,7 @@ export const SceneRenderer: React.FC = () => {
     const [, setSelection] = useContext(SelectionContext);
     const size = getCanvasSize(scene);
     const [stage, stageRef] = useState<Konva.Stage | null>(null);
+    const { zoom, setZoom } = useZoom();
 
     const onClickStage = (e: KonvaEventObject<MouseEvent>) => {
         // Clicking on nothing (with no modifier keys held) should cancel selection.
@@ -32,17 +34,43 @@ export const SceneRenderer: React.FC = () => {
         }
     };
 
-    // console.log(scene);
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+            setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta)));
+        }
+    }, [zoom, setZoom]);
+
+    // Calculate scaled dimensions
+    const scaledWidth = size.width * zoom;
+    const scaledHeight = size.height * zoom;
 
     return (
         <DropTarget stage={stage}>
-            <Stage {...size} ref={stageRef} onClick={onClickStage}>
-                <StageContext value={stage}>
-                    <DefaultCursorProvider>
-                        <SceneContents />
-                    </DefaultCursorProvider>
-                </StageContext>
-            </Stage>
+            <div
+                onWheel={handleWheel}
+                style={{
+                    width: scaledWidth,
+                    height: scaledHeight,
+                    flexShrink: 0,
+                }}
+            >
+                <Stage
+                    width={scaledWidth}
+                    height={scaledHeight}
+                    scaleX={zoom}
+                    scaleY={zoom}
+                    ref={stageRef}
+                    onClick={onClickStage}
+                >
+                    <StageContext value={stage}>
+                        <DefaultCursorProvider>
+                            <SceneContents />
+                        </DefaultCursorProvider>
+                    </StageContext>
+                </Stage>
+            </div>
         </DropTarget>
     );
 };
@@ -103,8 +131,8 @@ export const ScenePreview: React.FC<ScenePreviewProps> = ({
         () => undefined,
     ];
 
-    const selectionContext: SelectionState = [new Set<number>(), () => {}];
-    const spotlightContext: SelectionState = [new Set<number>(), () => {}];
+    const selectionContext: SelectionState = [new Set<number>(), () => { }];
+    const spotlightContext: SelectionState = [new Set<number>(), () => { }];
 
     return (
         <Stage ref={ref} x={x} y={y} width={width} height={height} scaleX={scale} scaleY={scale}>

@@ -8,6 +8,8 @@ import { SceneLoadErrorNotifier } from './SceneLoadErrorNotifier';
 import { useScene } from './SceneProvider';
 import { SelectionProvider } from './SelectionProvider';
 import { StepSelect } from './StepSelect';
+import { ZoomProvider } from './ZoomContext';
+import { ZoomControls } from './ZoomControls';
 import { DetailsPanel } from './panel/DetailsPanel';
 import { MainPanel } from './panel/MainPanel';
 import { SceneRenderer } from './render/SceneRenderer';
@@ -20,7 +22,9 @@ export const MainPage: React.FC = () => {
         <EditModeProvider>
             <SelectionProvider>
                 <PanelDragProvider>
-                    <MainPageContent />
+                    <ZoomProvider>
+                        <MainPageContent />
+                    </ZoomProvider>
                 </PanelDragProvider>
             </SelectionProvider>
         </EditModeProvider>
@@ -45,8 +49,13 @@ const MainPageContent: React.FC = () => {
 
             <StepSelect />
 
-            <div className={classes.stage}>
-                <SceneRenderer />
+            <div className={classes.stageContainer}>
+                <div className={classes.zoomControls}>
+                    <ZoomControls />
+                </div>
+                <div className={classes.stage}>
+                    <SceneRenderer />
+                </div>
             </div>
 
             {/* TODO: make panel collapsable */}
@@ -73,13 +82,26 @@ function usePageTitle() {
 }
 
 const useStyles = makeStyles({
-    stage: {
+    stageContainer: {
         gridArea: 'content',
         display: 'flex',
-        flexFlow: 'row',
-        justifyContent: 'center',
-        overflow: 'auto',
+        flexDirection: 'column',
         minWidth: MIN_STAGE_WIDTH,
         backgroundColor: tokens.colorNeutralBackground1,
+        position: 'relative',
+    },
+    zoomControls: {
+        position: 'absolute',
+        bottom: '16px',
+        right: '16px',
+        zIndex: 100,
+    },
+    stage: {
+        flex: 1,
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        overflow: 'auto',
     },
 });
+

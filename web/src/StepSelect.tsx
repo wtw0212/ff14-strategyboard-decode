@@ -47,10 +47,9 @@ export const StepSelect: React.FC = () => {
         dispatch({ type: 'setStep', index });
     };
 
-    const maxWidth = scene.arena.width + scene.arena.padding * 2;
 
     return (
-        <div className={classes.root} style={{ maxWidth }}>
+        <div className={classes.root}>
             <div className={classes.listWrapper}>
                 <TabList
                     size="small"
