@@ -6,7 +6,6 @@ import {
     UnknownObject,
     isArcZone,
     isArrow,
-    isColored,
     isConeZone,
     isDrawObject,
     isEnemy,
@@ -57,7 +56,7 @@ import { SizeControl } from './properties/SizeControl';
 import { StackCountControl } from './properties/StackCountControl';
 import { StarburstSpokeCountControl, StarburstSpokeWidthControl } from './properties/StarburstControls';
 import { TetherTypeControl, TetherWidthControl } from './properties/TetherControls';
-import { TextLayoutControl, TextOutlineControl, TextValueControl } from './properties/TextControls';
+import { TextLayoutControl, TextValueControl } from './properties/TextControls';
 
 export interface PropertiesPanelProps {
     className?: string;
@@ -117,13 +116,15 @@ const Controls: React.FC = () => {
             {/* Style */}
             <ControlCondition objects={objects} test={isTether} control={TetherTypeControl} />
             <div className={mergeClasses(classes.row, classes.alignTop)}>
-                <ControlCondition objects={objects} test={isColored} control={ColorControl} className={classes.grow} />
+                {/* Color only for Text and Line AOE - per game constraints */}
+                <ControlCondition objects={objects} test={(x) => isText(x) || isLineZone(x)} control={ColorControl} className={classes.grow} />
                 <ControlCondition objects={objects} test={isArrow} control={ArrowPointersControl} />
                 <ControlCondition objects={objects} test={supportsHollow} control={HollowControl} />
                 <ControlCondition objects={objects} test={isMarker} control={MarkerShapeControl} />
             </div>
-            <ControlCondition objects={objects} test={isColored} control={ColorSwatchControl} />
-            <ControlCondition objects={objects} test={isText} control={TextOutlineControl} />
+            {/* Color swatch only for Text and Line AOE */}
+            <ControlCondition objects={objects} test={(x) => isText(x) || isLineZone(x)} control={ColorSwatchControl} />
+            {/* TextOutlineControl removed - game doesn't support outline color */}
             <div className={mergeClasses(classes.row)}>
                 <OpacityControl objects={objects} className={classes.grow} />
                 <HideControl objects={objects} />

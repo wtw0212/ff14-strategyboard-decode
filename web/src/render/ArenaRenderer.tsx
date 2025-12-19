@@ -195,6 +195,11 @@ const RectangularBackground: React.FC = () => {
 const GridRenderer: React.FC = () => {
     const { scene } = useScene();
 
+    // Check gridVisible setting (default to true if undefined)
+    if (scene.arena.gridVisible === false) {
+        return null;
+    }
+
     switch (scene.arena.grid.type) {
         case GridType.None:
             return null;
@@ -203,7 +208,7 @@ const GridRenderer: React.FC = () => {
             return <RadialGridRenderer grid={scene.arena.grid} />;
 
         case GridType.Rectangular:
-            return <RectangularGridRenderer grid={scene.arena.grid} />;
+            return <EnhancedRectangularGridRenderer />;
 
         case GridType.CustomRectangular:
             return <CustomRectangularGridRenderer grid={scene.arena.grid} />;
@@ -211,6 +216,67 @@ const GridRenderer: React.FC = () => {
         case GridType.CustomRadial:
             return <CustomRadialGridRenderer grid={scene.arena.grid} />;
     }
+};
+
+// In-game style grid: gray thin lines every 32px, white thin center axis
+const EnhancedRectangularGridRenderer: React.FC = () => {
+    const { scene } = useScene();
+
+    const position = getCanvasArenaRect(scene);
+
+    // Grid settings - match in-game format
+    const gridSize = 32; // Grid line every 32px
+    const centerX = position.x + position.width / 2;  // 256 for 512 width
+    const centerY = position.y + position.height / 2; // 192 for 384 height
+
+    return (
+        <Shape
+            sceneFunc={(ctx) => {
+                // Draw all grid lines (gray, thin)
+                ctx.beginPath();
+                ctx.strokeStyle = '#808080'; // Gray
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.5;
+
+                for (let x = position.x + gridSize; x < position.x + position.width; x += gridSize) {
+                    // Skip center line, we'll draw it separately
+                    if (Math.abs(x - centerX) > 1) {
+                        ctx.moveTo(x, position.y);
+                        ctx.lineTo(x, position.y + position.height);
+                    }
+                }
+
+                for (let y = position.y + gridSize; y < position.y + position.height; y += gridSize) {
+                    // Skip center line
+                    if (Math.abs(y - centerY) > 1) {
+                        ctx.moveTo(position.x, y);
+                        ctx.lineTo(position.x + position.width, y);
+                    }
+                }
+
+                ctx.stroke();
+
+                // Draw center axis lines (white, thin)
+                ctx.beginPath();
+                ctx.strokeStyle = '#FFFFFF'; // White
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.7;
+
+                // Vertical center line
+                ctx.moveTo(centerX, position.y);
+                ctx.lineTo(centerX, position.y + position.height);
+
+                // Horizontal center line
+                ctx.moveTo(position.x, centerY);
+                ctx.lineTo(position.x + position.width, centerY);
+
+                ctx.stroke();
+
+                ctx.globalAlpha = 1;
+            }}
+            {...ALIGN_TO_PIXEL}
+        />
+    );
 };
 
 interface GridProps<T> {

@@ -29,6 +29,8 @@ import {
     isStarburstZone,
     PartyObject,
     EnemyObject,
+    ArenaShape,
+    GridType,
 } from '../scene';
 import { encodeStrategy, decodeStrategy } from './gameStrategyCodec';
 
@@ -37,31 +39,12 @@ import { encodeStrategy, decodeStrategy } from './gameStrategyCodec';
 // ============================================================================
 
 export const GAME_TYPES = {
-    // Generic Roles
-    tank: 0x2f,
-    healer: 0x32,
-    dps: 0x35,
-    tank_1: 0x30,
-    tank_2: 0x31,
-    healer_1: 0x33,
-    healer_2: 0x34,
-    dps_1: 0x36,
-    dps_2: 0x37,
-    dps_3: 0x38,
-    dps_4: 0x39,
-
+    // ===== Section 1: Jobs (Disciple of War & Magic) =====
     // Tanks
     paladin: 0x1b,
     warrior: 0x1d,
     dark_knight: 0x26,
     gunbreaker: 0x2b,
-
-    // Healers
-    white_mage: 0x20,
-    scholar: 0x23,
-    astrologian: 0x27,
-    sage: 0x2e,
-
     // Melee DPS
     monk: 0x1c,
     dragoon: 0x1e,
@@ -69,35 +52,78 @@ export const GAME_TYPES = {
     samurai: 0x28,
     reaper: 0x2d,
     viper: 0x65,
-
     // Physical Ranged DPS
     bard: 0x1f,
     machinist: 0x25,
     dancer: 0x2c,
-
     // Magical DPS
     black_mage: 0x21,
     summoner: 0x22,
     red_mage: 0x29,
     pictomancer: 0x66,
     blue_mage: 0x2a,
+    // Healers
+    white_mage: 0x20,
+    scholar: 0x23,
+    astrologian: 0x27,
+    sage: 0x2e,
 
+    // ===== Section 2: Base Classes =====
+    gladiator: 0x12,
+    pugilist: 0x13,
+    marauder: 0x14,
+    lancer: 0x15,
+    archer: 0x16,
+    conjurer: 0x17,
+    thaumaturge: 0x18,
+    arcanist: 0x19,
+    rogue: 0x1a,
+
+    // ===== Section 3: Generic Roles =====
+    tank: 0x2f,
+    tank_1: 0x30,
+    tank_2: 0x31,
+    healer: 0x32,
+    healer_1: 0x33,
+    healer_2: 0x34,
+    dps: 0x35,
+    dps_1: 0x36,
+    dps_2: 0x37,
+    dps_3: 0x38,
+    dps_4: 0x39,
+    melee_dps: 0x76,
+    ranged_dps: 0x77,
+    physical_ranged_dps: 0x78,
+    magical_ranged_dps: 0x79,
+    pure_healer: 0x7a,
+    barrier_healer: 0x7b,
+
+    // ===== Section 4: Attack Markers & Mechanics =====
     // AOE Types
     line_aoe: 0x01,
     circle_aoe: 0x09,
     fan_aoe: 0x0a,
     donut_aoe: 0x11,
     proximity: 0x10,
-
+    moving_circle_aoe: 0x7e,
+    one_person_aoe: 0x7f,
+    two_person_aoe: 0x80,
+    three_person_aoe: 0x81,
+    four_person_aoe: 0x82,
     // Mechanics
     marker: 0x0b,
     gaze: 0x0d,
     stack: 0x0e,
     line_stack: 0x0f,
+    stack_multi: 0x6a,
+    proximity_player: 0x6b,
+    tankbuster: 0x6c,
     radial_knockback: 0x6d,
     linear_knockback: 0x6e,
     tower: 0x6f,
+    targeting_indicator: 0x70,
 
+    // ===== Section 5: Waymarks, Signs & Target Markers =====
     // Waymarks
     waymark_a: 0x4f,
     waymark_b: 0x50,
@@ -107,22 +133,63 @@ export const GAME_TYPES = {
     waymark_2: 0x54,
     waymark_3: 0x55,
     waymark_4: 0x56,
-
-    // Enemies
+    // Target Markers (Attack)
+    attack_1: 0x41,
+    attack_2: 0x42,
+    attack_3: 0x43,
+    attack_4: 0x44,
+    attack_5: 0x45,
+    attack_6: 0x73,
+    attack_7: 0x74,
+    attack_8: 0x75,
+    // Target Markers (Bind/Ignore)
+    bind_1: 0x46,
+    bind_2: 0x47,
+    bind_3: 0x48,
+    ignore_1: 0x49,
+    ignore_2: 0x4a,
+    // Target Markers (Shapes)
+    sign_square: 0x4b,
+    sign_circle: 0x4c,
+    sign_plus: 0x4d,
+    sign_triangle: 0x4e,
+    // Lock-on Markers
+    lockon_red: 0x83,
+    lockon_blue: 0x84,
+    lockon_purple: 0x85,
+    lockon_green: 0x86,
+    // Enemies & Effects
     enemy_small: 0x3c,
     enemy_medium: 0x3e,
     enemy_large: 0x40,
+    enhancement_effect: 0x71,
+    enfeeblement_effect: 0x72,
 
-    // Text
-    text: 0x64,
-
-    // Line/Arrow
+    // ===== Section 6: Signs, Symbols & Fields =====
+    // Field Objects
+    checkered_circle: 0x04,
+    checkered_square: 0x08,
+    grey_circle: 0x7c,
+    grey_square: 0x7d,
+    // Line & Arrow
     line: 0x0c,
     up_arrow: 0x5e,
-
-    // Rotation
+    // Rotation Symbols
+    rotate: 0x67,
     rotate_cw: 0x8b,
     rotate_ccw: 0x8c,
+    // Highlighted Shapes
+    highlight_circle: 0x87,
+    highlight_x: 0x88,
+    highlight_square: 0x89,
+    highlight_triangle: 0x8a,
+    // Standard Signs
+    standard_circle: 0x57,
+    standard_x: 0x58,
+    standard_triangle: 0x59,
+    standard_square: 0x5a,
+    // Text
+    text: 0x64,
 } as const;
 
 // Reverse lookup
@@ -181,6 +248,17 @@ const JOB_NAME_TO_ID: Record<string, number> = {
     'red mage': 0x29,
     pictomancer: 0x66,
     'blue mage': 0x2a,
+
+    // Base Classes (Section 2)
+    gladiator: 0x12,
+    pugilist: 0x13,
+    marauder: 0x14,
+    lancer: 0x15,
+    archer: 0x16,
+    conjurer: 0x17,
+    thaumaturge: 0x18,
+    arcanist: 0x19,
+    rogue: 0x1a,
 };
 
 // Waymark name to type ID (from OBJECT_TYPES.md section 5)
@@ -251,6 +329,7 @@ export interface GameObject {
     paramA: number;
     paramB: number;
     paramC: number;
+    textContent?: string; // For Text objects (type 0x64)
 }
 
 export interface ConversionResult {
@@ -481,7 +560,7 @@ function convertObject(
 
     if (isText(obj)) {
         gameObj.typeId = GAME_TYPES.text;
-        // Note: Game text encoding is complex, may need special handling
+        gameObj.textContent = obj.text || ''; // Capture text content for export
         return gameObj;
     }
 
@@ -521,9 +600,26 @@ export function generateStrategyBinary(title: string, objects: GameObject[]): Ui
     const content: number[] = [];
 
     // TYPE blocks: 4 bytes each (0x0002, typeId)
+    // For Text objects, also emit text content block (03 00 [LEN] 00 [STRING])
     for (const obj of objects) {
         content.push(0x02, 0x00); // Block ID
         content.push(obj.typeId & 0xff, (obj.typeId >> 8) & 0xff);
+
+        // For Text objects, emit text content block immediately after type block
+        if (obj.typeId === GAME_TYPES.text && obj.textContent) {
+            const textBytes = new TextEncoder().encode(obj.textContent + '\0'); // String + null terminator
+            // Pad to 4-byte alignment (required by game format)
+            const paddedLen = Math.ceil(textBytes.length / 4) * 4;
+            content.push(0x03, 0x00); // Block ID
+            content.push(paddedLen & 0xff, (paddedLen >> 8) & 0xff); // Length
+            for (let i = 0; i < textBytes.length; i++) {
+                content.push(textBytes[i]!);
+            }
+            // Add padding to 4-byte boundary
+            for (let i = textBytes.length; i < paddedLen; i++) {
+                content.push(0x00);
+            }
+        }
     }
 
     // LAYER block: uint16 per object
@@ -643,12 +739,15 @@ export function gameCodeToScene(code: string): Scene {
     return {
         nextId: sceneObjects.length + 1,
         arena: {
-            shape: 'rectangle',
+            shape: ArenaShape.Rectangle,
             width: 512,
             height: 384,
             padding: 0,
-            grid: { type: 'rectangular', rows: 6, columns: 8 }
-        } as any, // Cast to avoid import circular dependency issues if types differ slightly
+            grid: { type: GridType.Rectangular, rows: 6, columns: 8 },
+            gridVisible: true,
+            snapToGrid: false,
+            snapGridSize: 32,
+        },
         steps: [{ objects: sceneObjects }],
     };
 }
@@ -665,11 +764,12 @@ function parseStrategyBinary(binary: Uint8Array): GameObject[] {
 
     // 1. Parse TYPE blocks (start of content)
     // Structure: 02 00 [ID] 00
+    // For Text objects (0x64), text content block follows immediately: 03 00 [LEN] 00 [STRING]
     while (offset < binary.length) {
         if (view.getUint8(offset) !== 0x02) break; // Not a type block
 
         const typeId = view.getUint16(offset + 2, true);
-        objects.push({
+        const obj: GameObject = {
             typeId,
             x: 0,
             y: 0,
@@ -680,8 +780,29 @@ function parseStrategyBinary(binary: Uint8Array): GameObject[] {
             paramA: 0,
             paramB: 0,
             paramC: 0
-        });
+        };
         offset += 4;
+
+        // For Text objects, parse the following text content block (03 00 [LEN] 00 [STRING])
+        if (typeId === GAME_TYPES.text && offset < binary.length && view.getUint8(offset) === 0x03) {
+            const textBlockLen = view.getUint16(offset + 2, true); // Total length including padding
+
+            if (textBlockLen > 0 && textBlockLen < 256) {
+                const textStart = offset + 4;
+                // Find null terminator to get actual string length
+                let textEnd = textStart;
+                while (textEnd < textStart + textBlockLen && textEnd < binary.length && view.getUint8(textEnd) !== 0) {
+                    textEnd++;
+                }
+                const textBytes = binary.slice(textStart, textEnd);
+                obj.textContent = new TextDecoder('utf-8').decode(textBytes);
+
+                // Move past text block (header 4 bytes + content)
+                offset += 4 + textBlockLen;
+            }
+        }
+
+        objects.push(obj);
     }
 
     const num = objects.length;
@@ -689,7 +810,11 @@ function parseStrategyBinary(binary: Uint8Array): GameObject[] {
     // 2. Parse remaining blocks
     while (offset < binary.length) {
         const blockId = view.getUint8(offset);
-        if (blockId === 0x03) break; // Footer
+
+        // 0x03 is footer (text content is now parsed inline with type blocks)
+        if (blockId === 0x03) {
+            break; // Footer reached
+        }
 
         // Standard block header: [ID] 00 [SUB] 00 [COUNT] 00
         // But count is at offset+4 (2 bytes)
@@ -852,18 +977,93 @@ function convertGameToSceneObject(gameObj: GameObject, idMap: Record<number, str
     }
 
     // 6. Jobs/Roles (Party)
-    // Check if name is a job
-    if (gameObj.typeId >= 0x1B && gameObj.typeId <= 0x39) { // Job ID range roughly
-        // e.g. "paladin", "white_mage"
-        const jobName = typeName.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
-        return { ...base, type: ObjectType.Party, name: jobName } as any;
+    // Create mapping from game type ID to job icon info
+    const gameTypeToJob: Record<number, { name: string; icon: string }> = {
+        // Jobs
+        [GAME_TYPES.paladin]: { name: 'Paladin', icon: '/actor/PLD.png' },
+        [GAME_TYPES.warrior]: { name: 'Warrior', icon: '/actor/WAR.png' },
+        [GAME_TYPES.dark_knight]: { name: 'Dark Knight', icon: '/actor/DRK.png' },
+        [GAME_TYPES.gunbreaker]: { name: 'Gunbreaker', icon: '/actor/GNB.png' },
+        [GAME_TYPES.white_mage]: { name: 'White Mage', icon: '/actor/WHM.png' },
+        [GAME_TYPES.scholar]: { name: 'Scholar', icon: '/actor/SCH.png' },
+        [GAME_TYPES.astrologian]: { name: 'Astrologian', icon: '/actor/AST.png' },
+        [GAME_TYPES.sage]: { name: 'Sage', icon: '/actor/SGE.png' },
+        [GAME_TYPES.monk]: { name: 'Monk', icon: '/actor/MNK.png' },
+        [GAME_TYPES.dragoon]: { name: 'Dragoon', icon: '/actor/DRG.png' },
+        [GAME_TYPES.ninja]: { name: 'Ninja', icon: '/actor/NIN.png' },
+        [GAME_TYPES.samurai]: { name: 'Samurai', icon: '/actor/SAM.png' },
+        [GAME_TYPES.reaper]: { name: 'Reaper', icon: '/actor/RPR.png' },
+        [GAME_TYPES.viper]: { name: 'Viper', icon: '/actor/VPR.png' },
+        [GAME_TYPES.bard]: { name: 'Bard', icon: '/actor/BRD.png' },
+        [GAME_TYPES.machinist]: { name: 'Machinist', icon: '/actor/MCH.png' },
+        [GAME_TYPES.dancer]: { name: 'Dancer', icon: '/actor/DNC.png' },
+        [GAME_TYPES.black_mage]: { name: 'Black Mage', icon: '/actor/BLM.png' },
+        [GAME_TYPES.summoner]: { name: 'Summoner', icon: '/actor/SMN.png' },
+        [GAME_TYPES.red_mage]: { name: 'Red Mage', icon: '/actor/RDM.png' },
+        [GAME_TYPES.pictomancer]: { name: 'Pictomancer', icon: '/actor/PCT.png' },
+        [GAME_TYPES.blue_mage]: { name: 'Blue Mage', icon: '/actor/BLU.png' },
+        // Base Classes
+        [GAME_TYPES.gladiator]: { name: 'Gladiator', icon: '/actor/GLA.png' },
+        [GAME_TYPES.pugilist]: { name: 'Pugilist', icon: '/actor/PGL.png' },
+        [GAME_TYPES.marauder]: { name: 'Marauder', icon: '/actor/MRD.png' },
+        [GAME_TYPES.lancer]: { name: 'Lancer', icon: '/actor/LNC.png' },
+        [GAME_TYPES.archer]: { name: 'Archer', icon: '/actor/ARC.png' },
+        [GAME_TYPES.conjurer]: { name: 'Conjurer', icon: '/actor/CNJ.png' },
+        [GAME_TYPES.thaumaturge]: { name: 'Thaumaturge', icon: '/actor/THM.png' },
+        [GAME_TYPES.arcanist]: { name: 'Arcanist', icon: '/actor/ACN.png' },
+        [GAME_TYPES.rogue]: { name: 'Rogue', icon: '/actor/ROG.png' },
+        // Generic Roles
+        [GAME_TYPES.tank]: { name: 'Tank', icon: '/actor/tank.png' },
+        [GAME_TYPES.tank_1]: { name: 'Tank 1', icon: '/actor/tank.png' },
+        [GAME_TYPES.tank_2]: { name: 'Tank 2', icon: '/actor/tank.png' },
+        [GAME_TYPES.healer]: { name: 'Healer', icon: '/actor/healer.png' },
+        [GAME_TYPES.healer_1]: { name: 'Healer 1', icon: '/actor/healer.png' },
+        [GAME_TYPES.healer_2]: { name: 'Healer 2', icon: '/actor/healer.png' },
+        [GAME_TYPES.dps]: { name: 'DPS', icon: '/actor/dps.png' },
+        [GAME_TYPES.dps_1]: { name: 'DPS 1', icon: '/actor/dps.png' },
+        [GAME_TYPES.dps_2]: { name: 'DPS 2', icon: '/actor/dps.png' },
+        [GAME_TYPES.dps_3]: { name: 'DPS 3', icon: '/actor/dps.png' },
+        [GAME_TYPES.dps_4]: { name: 'DPS 4', icon: '/actor/dps.png' },
+        [GAME_TYPES.melee_dps]: { name: 'Melee DPS', icon: '/actor/melee.png' },
+        [GAME_TYPES.ranged_dps]: { name: 'Ranged DPS', icon: '/actor/ranged.png' },
+        [GAME_TYPES.physical_ranged_dps]: { name: 'Physical Ranged', icon: '/actor/physical_ranged.png' },
+        [GAME_TYPES.magical_ranged_dps]: { name: 'Magic Ranged', icon: '/actor/magic_ranged.png' },
+        [GAME_TYPES.pure_healer]: { name: 'Pure Healer', icon: '/actor/healer.png' },
+        [GAME_TYPES.barrier_healer]: { name: 'Barrier Healer', icon: '/actor/healer.png' },
+    };
+
+    const jobInfo = gameTypeToJob[gameObj.typeId];
+    if (jobInfo) {
+        // Calculate size from scale (default icon size is 32, scale 100 = default)
+        const size = Math.round(32 * (gameObj.scale / 100));
+        return {
+            ...base,
+            type: ObjectType.Party,
+            name: jobInfo.name,
+            image: jobInfo.icon,
+            width: size || 32,
+            height: size || 32,
+            status: [],
+        } as any;
     }
 
-    // 7. Marker
+    // 7. Marker (Waymarks)
     if (gameObj.typeId >= 0x4F && gameObj.typeId <= 0x56) { // Waymarks
-        // typeName is 'waymark a' etc.
         const markerChar = typeName.replace('waymark ', '').toUpperCase();
         return { ...base, type: ObjectType.Marker, name: markerChar } as any;
+    }
+
+    // 8. Text
+    if (gameObj.typeId === GAME_TYPES.text) {
+        return {
+            ...base,
+            type: ObjectType.Text,
+            text: gameObj.textContent || 'Text', // Use parsed text content or default
+            fontSize: 24,
+            style: 'outline',
+            stroke: '#000000',
+            align: 'center',
+        } as any;
     }
 
     // Default fallback

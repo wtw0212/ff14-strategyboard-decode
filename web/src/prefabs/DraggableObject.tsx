@@ -95,7 +95,17 @@ function updatePosition(
     // Konva automatically moves the object to e.target.position() in canvas
     // coordinates. Subtracting the object's original position gives the offset
     // that needs to be applied to all objects being dragged.
-    const pos = getSceneCoord(scene, e.target.position());
+    let pos = getSceneCoord(scene, e.target.position());
+
+    // Apply snap-to-grid if enabled
+    if (scene.arena.snapToGrid) {
+        const gridSize = scene.arena.snapGridSize ?? 32;
+        pos = {
+            x: Math.round(pos.x / gridSize) * gridSize,
+            y: Math.round(pos.y / gridSize) * gridSize,
+        };
+    }
+
     const offset = vecSub(pos, targetObject);
 
     if (offset.x === 0 && offset.y === 0) {

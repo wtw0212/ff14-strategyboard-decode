@@ -125,6 +125,9 @@ export interface Arena {
     readonly height: number;
     readonly padding: number;
     readonly grid: Grid;
+    readonly gridVisible?: boolean;
+    readonly snapToGrid?: boolean;
+    readonly snapGridSize?: number;
     readonly ticks?: Ticks;
     readonly backgroundImage?: string;
     readonly backgroundOpacity?: number;
@@ -541,6 +544,9 @@ export const DEFAULT_ARENA: Arena = {
     height: 384,
     padding: 0,
     grid: DEFAULT_GAME_GRID,
+    gridVisible: true,
+    snapToGrid: false,
+    snapGridSize: 32,
 };
 
 export const DEFAULT_SCENE: Scene = {

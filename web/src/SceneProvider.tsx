@@ -65,6 +65,21 @@ export interface SetArenaBackgroundOpacityAction {
     value: number;
 }
 
+export interface SetGridVisibleAction {
+    type: 'arenaGridVisible';
+    value: boolean;
+}
+
+export interface SetSnapToGridAction {
+    type: 'arenaSnapToGrid';
+    value: boolean;
+}
+
+export interface SetSnapGridSizeAction {
+    type: 'arenaSnapGridSize';
+    value: number;
+}
+
 export type ArenaAction =
     | SetArenaAction
     | SetArenaShapeAction
@@ -74,7 +89,10 @@ export type ArenaAction =
     | SetArenaGridAction
     | SetArenaTicksActions
     | SetArenaBackgroundAction
-    | SetArenaBackgroundOpacityAction;
+    | SetArenaBackgroundOpacityAction
+    | SetGridVisibleAction
+    | SetSnapToGridAction
+    | SetSnapGridSizeAction;
 
 export interface ObjectUpdateAction {
     type: 'update';
@@ -179,7 +197,7 @@ const HISTORY_SIZE = 1000;
 
 const SourceContext = createContext<[FileSource | undefined, Dispatch<SetStateAction<FileSource | undefined>>]>([
     undefined,
-    () => {},
+    () => { },
 ]);
 
 const { UndoProvider, Context, usePresent, useUndoRedoPossible } = createUndoContext(sceneReducer, HISTORY_SIZE);
@@ -584,6 +602,15 @@ function sceneReducer(state: Readonly<EditorState>, action: SceneAction): Editor
 
         case 'arenaBackgroundOpacity':
             return updateArena(state, { ...state.scene.arena, backgroundOpacity: action.value });
+
+        case 'arenaGridVisible':
+            return updateArena(state, { ...state.scene.arena, gridVisible: action.value });
+
+        case 'arenaSnapToGrid':
+            return updateArena(state, { ...state.scene.arena, snapToGrid: action.value });
+
+        case 'arenaSnapGridSize':
+            return updateArena(state, { ...state.scene.arena, snapGridSize: action.value });
 
         case 'add':
             return addObjects(state, action.object);

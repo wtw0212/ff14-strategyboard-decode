@@ -16,6 +16,8 @@ import {
     OpenRegular,
     SaveEditRegular,
     SaveRegular,
+    GridDotsRegular,
+    TargetRegular,
 } from '@fluentui/react-icons';
 import React, { ReactElement, useContext, useState } from 'react';
 import { InPortal } from 'react-reverse-portal';
@@ -92,6 +94,10 @@ export const MainToolbar: React.FC = () => {
                     <GameCodeExportButton>Export to Game</GameCodeExportButton>
 
                     <StepScreenshotButton>Screenshot</StepScreenshotButton>
+
+                    <ToolbarDivider />
+
+                    <GridToggleButtons />
                 </Toolbar>
             </InPortal>
         </>
@@ -210,6 +216,39 @@ const SaveButton: React.FC = () => {
             <DialogOpenContext value={setSaveAsOpen}>
                 <SaveAsDialog open={saveAsOpen} onOpenChange={(ev, data) => setSaveAsOpen(data.open)} />
             </DialogOpenContext>
+        </>
+    );
+};
+
+const GridToggleButtons: React.FC = () => {
+    const { scene, dispatch } = useScene();
+    const gridVisible = scene.arena.gridVisible ?? true;
+    const snapEnabled = scene.arena.snapToGrid ?? false;
+
+    const toggleGrid = () => {
+        dispatch({ type: 'arenaGridVisible', value: !gridVisible });
+    };
+
+    const toggleSnap = () => {
+        dispatch({ type: 'arenaSnapToGrid', value: !snapEnabled });
+    };
+
+    return (
+        <>
+            <CollapsableToolbarButton
+                icon={<GridDotsRegular />}
+                onClick={toggleGrid}
+                appearance={gridVisible ? 'primary' : 'subtle'}
+            >
+                Grid
+            </CollapsableToolbarButton>
+            <CollapsableToolbarButton
+                icon={<TargetRegular />}
+                onClick={toggleSnap}
+                appearance={snapEnabled ? 'primary' : 'subtle'}
+            >
+                Snap
+            </CollapsableToolbarButton>
         </>
     );
 };

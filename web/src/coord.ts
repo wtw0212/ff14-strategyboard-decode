@@ -11,6 +11,23 @@ export const ALIGN_TO_PIXEL = {
 };
 
 /**
+ * Snap a coordinate to the nearest grid intersection
+ */
+export function snapToGrid(value: number, gridSize: number): number {
+    return Math.round(value / gridSize) * gridSize;
+}
+
+/**
+ * Snap a point to the nearest grid intersection
+ */
+export function snapPointToGrid(x: number, y: number, gridSize: number): Vector2d {
+    return {
+        x: snapToGrid(x, gridSize),
+        y: snapToGrid(y, gridSize),
+    };
+}
+
+/**
  * Coordinate System:
  * - Top-left origin (0,0) at top-left corner
  * - +X goes right, +Y goes down
