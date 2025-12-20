@@ -63,6 +63,11 @@ export const AboutDialog: React.FC<AboutDialogProps> = (props) => {
                             </ExternalLink>{' '}
                             by kotarou3
                         </p>
+                        <h2>Strategy Board Codec</h2>
+                        <p>
+                            This page uses the <strong>Strategy Board Codec</strong>. The codec is developed by{' '}
+                            <ExternalLink href="https://github.com/wtw0212">wtw0212</ExternalLink>.
+                        </p>
                     </DialogContent>
                     <DialogActions>
                         <DialogTrigger disableButtonEnhancement>
