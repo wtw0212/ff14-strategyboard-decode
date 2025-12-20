@@ -36,20 +36,18 @@ import {
     PartyWhiteMage,
 } from '../prefabs/Party';
 import { TextLabel } from '../prefabs/TextLabel';
-import { ZoneArc } from '../prefabs/zone/ZoneArc';
+import { ZoneExaflare } from '../prefabs/zone/ZoneExaflare';
 import { ZoneCircle } from '../prefabs/zone/ZoneCircle';
 import { ZoneCone } from '../prefabs/zone/ZoneCone';
 import { ZoneDonut } from '../prefabs/zone/ZoneDonut';
 import { ZoneEye } from '../prefabs/zone/ZoneEye';
 import { ZoneKnockback } from '../prefabs/zone/ZoneKnockback';
-import { ZoneLineKnockAway } from '../prefabs/zone/ZoneLineKnockAway';
 import { ZoneLineKnockback } from '../prefabs/zone/ZoneLineKnockback';
 import { ZoneLineStack } from '../prefabs/zone/ZoneLineStack';
 import { ZoneProximity } from '../prefabs/zone/ZoneProximity';
 import { ZoneSquare } from '../prefabs/zone/ZoneRectangle';
 import { ZoneRotateClockwise, ZoneRotateCounterClockwise } from '../prefabs/zone/ZoneRotate';
 import { ZoneStack } from '../prefabs/zone/ZoneStack';
-import { ZoneStarburst } from '../prefabs/zone/ZoneStarburst';
 import { ZoneTower } from '../prefabs/zone/ZoneTower';
 import { useControlStyles } from '../useControlStyles';
 import { ObjectGroup, Section } from './Section';
@@ -69,12 +67,10 @@ export const PrefabsPanel: React.FC = () => {
                     <ZoneProximity />
                     <ZoneLineStack />
                     <ZoneStack />
-                    <ZoneArc />
                     <ZoneCone />
+                    <ZoneExaflare />
 
                     <ZoneLineKnockback />
-                    <ZoneLineKnockAway />
-                    <ZoneStarburst />
                     <ZoneRotateClockwise />
                     <ZoneRotateCounterClockwise />
 

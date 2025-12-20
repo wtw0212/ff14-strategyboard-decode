@@ -27,6 +27,8 @@ import {
     isColored,
     isEye,
     isStarburstZone,
+    isIcon,
+    isExaflareZone,
     PartyObject,
     EnemyObject,
     ArenaShape,
@@ -619,6 +621,15 @@ function convertObject(
         return gameObj;
     }
 
+    // XIVPlan Exaflare zone (Moving AOE) maps to game moving_circle_aoe (0x7E)
+    if (isExaflareZone(obj)) {
+        gameObj.typeId = GAME_TYPES.moving_circle_aoe;
+        if (isRadiusObject(obj)) {
+            gameObj.scale = Math.round(obj.radius / 2.47);
+        }
+        return gameObj;
+    }
+
     if (isMarker(obj)) {
         const markerName = obj.name.toLowerCase();
         // Check waymarks first
@@ -642,6 +653,19 @@ function convertObject(
         gameObj.typeId = GAME_TYPES.text;
         gameObj.textContent = obj.text || ''; // Capture text content for export
         return gameObj;
+    }
+
+    // Icon objects (Attack 1-8, Bind 1-3, Ignore 1-2, etc.)
+    if (isIcon(obj)) {
+        const iconName = obj.name?.toLowerCase() || '';
+        // Check attack/bind/ignore/shape markers
+        const markerId = MARKER_NAME_TO_ID[iconName];
+        if (markerId !== undefined) {
+            gameObj.typeId = markerId;
+            return gameObj;
+        }
+        // Unsupported icon type
+        return null;
     }
 
     // Unsupported types: Tether, Draw, Arrow, etc.

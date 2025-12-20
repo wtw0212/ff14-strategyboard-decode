@@ -254,6 +254,7 @@ Strategy codes use a block-based binary format. Each block follows the pattern:
 | Fan AOE (Cone) | Outer radius | Arc angle (1-360°) | Unused (0) | Unused |
 | Donut AOE | Outer radius | Arc angle (default 360°) | Inner radius % (0-100) | Unused |
 | Line AOE | Unused | Width (pixels) | Height/Length (pixels) | Unused |
+| Line (Tether) | Unused | End X coord ×10 | End Y coord ×10 | Height (2-10, default 6) |
 | Line Stack | Unused | Width (pixels) | Height (pixels) | Unused |
 | General Marker | Unused | Width (pixels) | Height (pixels) | Unused |
 | Tower | Outer radius | Unused | Unused | Unused |
@@ -261,6 +262,7 @@ Strategy codes use a block-based binary format. Each block follows the pattern:
 | Proximity | Outer radius | Unused | Unused | Unused |
 | Knockback | Outer radius | Unused | Unused | Unused |
 | Linear Knockback | Unused | Count | Unused | Unused |
+| Moving Circle AOE | Outer radius | Unused | Unused | Unused |
 
 ---
 
@@ -323,6 +325,38 @@ In strategies with N objects:
 - Each parameter block contains N values
 - Block offsets shift based on title length and object count
 - Use signatures (05 00 03 00, 07 00 00 00, etc.) to locate blocks
+
+### Line (Tether) Type (0x0C)
+
+The Line object stores position as the **center point** of the line, with end coordinates in PARAM_A/B:
+
+| Parameter | Block | Description |
+| :--- | :--- | :--- |
+| Position (X, Y) | 0x05 | Center of line ×10 |
+| Rotation | 0x06 | Angle in degrees (0° = right, 90° = down) |
+| Color | 0x08 | RGBA values |
+| PARAM_A | 0x0A | End point X coordinate ×10 |
+| PARAM_B | 0x0B | End point Y coordinate ×10 |
+| PARAM_C | 0x0C | Height/thickness in pixels (2-10, default 6) |
+
+**Formula to calculate line length:**
+```
+endX = PARAM_A / 10
+endY = PARAM_B / 10
+centerX = position_X / 10
+centerY = position_Y / 10
+
+deltaX = endX - centerX
+deltaY = endY - centerY
+halfLength = sqrt(deltaX² + deltaY²)
+fullLength = halfLength × 2
+```
+
+**Example:**
+- Center: (142.9, 192.0)
+- PARAM_A: 3692 → endX = 369.2
+- PARAM_B: 1920 → endY = 192.0
+- Delta: (226.3, 0) → halfLength = 226.3px → fullLength ≈ 453px
 
 ---
 
