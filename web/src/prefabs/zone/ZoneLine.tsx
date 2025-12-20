@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Circle, Group, Rect } from 'react-konva';
-import { Label } from '@fluentui/react-components';
 import Icon from '../../assets/zone/line.svg?react';
 import { getPointerAngle, snapAngle } from '../../coord';
 import { getResizeCursor } from '../../cursor';
@@ -10,10 +9,10 @@ import { ListComponentProps, registerListComponent } from '../../panel/ListCompo
 import { LayerName } from '../../render/layers';
 import { registerRenderer, RendererProps } from '../../render/ObjectRegistry';
 import { ActivePortal } from '../../render/Portals';
-import { LineZone, ObjectType, RectangleZone } from '../../scene';
+import { ObjectType, RectangleZone } from '../../scene';
 import { useScene } from '../../SceneProvider';
 import { useIsDragging } from '../../selection';
-import { CENTER_DOT_RADIUS, DEFAULT_AOE_COLOR, DEFAULT_AOE_OPACITY, panelVars, makeColorSwatch } from '../../theme';
+import { CENTER_DOT_RADIUS, DEFAULT_AOE_COLOR, DEFAULT_AOE_OPACITY, panelVars } from '../../theme';
 import { usePanelDrag } from '../../usePanelDrag';
 import { distance, getDistanceFromLine, VEC_ZERO, vecAtAngle } from '../../vector';
 import { MIN_LINE_LENGTH, MIN_LINE_WIDTH } from '../bounds';
@@ -23,19 +22,6 @@ import { HideGroup } from '../HideGroup';
 import { useHighlightProps, useShowResizer } from '../highlight';
 import { PrefabIcon } from '../PrefabIcon';
 import { getZoneStyle } from './style';
-import { CompactSwatchColorPicker } from '../../CompactSwatchColorPicker';
-
-// Game color palette for color picker
-const GAME_COLOR_PALETTE = [
-    '#FFFFFF', '#FFBDBF', '#FFE0C8', '#FFF8B0', '#E9FFE2', '#E8FFFE', '#9CD0F4', '#FFDCFF',
-    '#F8F8F8', '#FF0000', '#FF8000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF',
-    '#E0E0E0', '#FF4C4C', '#FFA666', '#FFFFB2', '#80FF00', '#BCFFF0', '#0080FF', '#E26090',
-    '#D8D8D8', '#FF7F7F', '#FFCEAC', '#FFDE73', '#80F860', '#66E6FF', '#94C0FF', '#FF8CC6',
-];
-
-const COLOR_SWATCHES = GAME_COLOR_PALETTE.map((color, index) =>
-    makeColorSwatch(color, `lineaoe-${index}`)
-);
 
 const NAME = 'Line';
 
@@ -74,11 +60,12 @@ registerDropHandler<RectangleZone>(ObjectType.Rect, (object, position) => {
             color: DEFAULT_AOE_COLOR,
             opacity: DEFAULT_AOE_OPACITY,
             width: DEFAULT_WIDTH,
-            height: DEFAULT_LENGTH,  // Rect uses 'height' not 'length'
+            height: DEFAULT_LENGTH,
             rotation: 0,
             hollow: false,
             ...object,
             ...position,
+            type: ObjectType.Rect, // Ensure type is explicitly set to Rect
         },
     };
 });
@@ -97,12 +84,12 @@ const LineDetails: React.FC<ListComponentProps<RectangleZone>> = ({ object, ...p
 registerListComponent<RectangleZone>(ObjectType.Rect, LineDetails);
 
 enum HandleId {
-    Length,
+    Height,
     Width,
 }
 
 interface LineState {
-    length: number;
+    height: number;
     width: number;
     rotation: number;
 }
@@ -112,16 +99,16 @@ const ROTATE_SNAP_TOLERANCE = 2;
 
 const OUTSET = 2;
 
-function getLength(object: LineZone, { pointerPos, activeHandleId }: HandleFuncProps) {
-    if (pointerPos && activeHandleId === HandleId.Length) {
+function getHeight(object: RectangleZone, { pointerPos, activeHandleId }: HandleFuncProps) {
+    if (pointerPos && activeHandleId === HandleId.Height) {
         return Math.max(MIN_LINE_LENGTH, Math.round(distance(pointerPos) - OUTSET));
     }
 
-    return object.length;
+    return object.height;
 }
 
-function getRotation(object: LineZone, { pointerPos, activeHandleId }: HandleFuncProps) {
-    if (pointerPos && activeHandleId === HandleId.Length) {
+function getRotation(object: RectangleZone, { pointerPos, activeHandleId }: HandleFuncProps) {
+    if (pointerPos && activeHandleId === HandleId.Height) {
         const angle = getPointerAngle(pointerPos);
         return snapAngle(angle, ROTATE_SNAP_DIVISION, ROTATE_SNAP_TOLERANCE);
     }
@@ -129,7 +116,7 @@ function getRotation(object: LineZone, { pointerPos, activeHandleId }: HandleFun
     return object.rotation;
 }
 
-function getWidth(object: LineZone, { pointerPos, activeHandleId }: HandleFuncProps) {
+function getWidth(object: RectangleZone, { pointerPos, activeHandleId }: HandleFuncProps) {
     if (pointerPos && activeHandleId == HandleId.Width) {
         const start = VEC_ZERO;
         const end = vecAtAngle(object.rotation);
@@ -141,41 +128,41 @@ function getWidth(object: LineZone, { pointerPos, activeHandleId }: HandleFuncPr
     return object.width;
 }
 
-const LineControlPoints = createControlPointManager<LineZone, LineState>({
+const LineControlPoints = createControlPointManager<RectangleZone, LineState>({
     handleFunc: (object, handle) => {
-        const length = getLength(object, handle) + OUTSET;
+        const height = getHeight(object, handle) + OUTSET;
         const width = getWidth(object, handle);
         const rotation = getRotation(object, handle);
 
         const x = width / 2;
-        const y = -length / 2;
+        const y = -height / 2;
 
         return [
-            { id: HandleId.Length, style: HandleStyle.Square, cursor: getResizeCursor(rotation), x: 0, y: -length },
+            { id: HandleId.Height, style: HandleStyle.Square, cursor: getResizeCursor(rotation), x: 0, y: -height },
             { id: HandleId.Width, style: HandleStyle.Diamond, cursor: getResizeCursor(rotation + 90), x: x, y: y },
             { id: HandleId.Width, style: HandleStyle.Diamond, cursor: getResizeCursor(rotation + 90), x: -x, y: y },
         ];
     },
     getRotation: getRotation,
     stateFunc: (object, handle) => {
-        const length = getLength(object, handle);
+        const height = getHeight(object, handle);
         const width = getWidth(object, handle);
         const rotation = getRotation(object, handle);
 
-        return { length, width, rotation };
+        return { height, width, rotation };
     },
     onRenderBorder: (object, state) => {
         const strokeWidth = 1;
         const width = state.width + strokeWidth * 2;
-        const length = state.length + strokeWidth * 2;
+        const height = state.height + strokeWidth * 2;
 
         return (
             <>
                 <Rect
                     x={-width / 2}
-                    y={-length + strokeWidth}
+                    y={-height + strokeWidth}
                     width={width}
-                    height={length}
+                    height={height}
                     stroke={CONTROL_POINT_BORDER_COLOR}
                     strokeWidth={strokeWidth}
                     fillEnabled={false}
@@ -186,22 +173,22 @@ const LineControlPoints = createControlPointManager<LineZone, LineState>({
     },
 });
 
-interface LineRendererProps extends RendererProps<LineZone> {
-    length: number;
+interface LineRendererProps extends RendererProps<RectangleZone> {
+    height: number;
     width: number;
     rotation: number;
     isDragging?: boolean;
 }
 
-const LineRenderer: React.FC<LineRendererProps> = ({ object, length, width, rotation, isDragging }) => {
+const LineRenderer: React.FC<LineRendererProps> = ({ object, height, width, rotation, isDragging }) => {
     const highlightProps = useHighlightProps(object);
-    const style = getZoneStyle(object.color, object.opacity, Math.min(length, width), object.hollow);
+    const style = getZoneStyle(object.color, object.opacity, Math.min(height, width), object.hollow);
 
     const x = -width / 2;
-    const y = -length;
+    const y = -height;
     const highlightOffset = style.strokeWidth;
     const highlightWidth = width + highlightOffset;
-    const highlightLength = length + highlightOffset;
+    const highlightHeight = height + highlightOffset;
 
     return (
         <Group rotation={rotation}>
@@ -210,14 +197,14 @@ const LineRenderer: React.FC<LineRendererProps> = ({ object, length, width, rota
                     x={x}
                     y={y}
                     width={highlightWidth}
-                    height={highlightLength}
+                    height={highlightHeight}
                     offsetX={highlightOffset / 2}
                     offsetY={highlightOffset / 2}
                     {...highlightProps}
                 />
             )}
             <HideGroup>
-                <Rect x={x} y={y} width={width} height={length} {...style} />
+                <Rect x={x} y={y} width={width} height={height} {...style} />
 
                 {isDragging && <Circle radius={CENTER_DOT_RADIUS} fill={style.stroke} />}
             </HideGroup>
@@ -225,11 +212,11 @@ const LineRenderer: React.FC<LineRendererProps> = ({ object, length, width, rota
     );
 };
 
-function stateChanged(object: LineZone, state: LineState) {
-    return state.length !== object.length || state.rotation !== object.rotation || state.width !== object.width;
+function stateChanged(object: RectangleZone, state: LineState) {
+    return state.height !== object.height || state.rotation !== object.rotation || state.width !== object.width;
 }
 
-const LineContainer: React.FC<RendererProps<LineZone>> = ({ object }) => {
+const LineContainer: React.FC<RendererProps<RectangleZone>> = ({ object }) => {
     const { dispatch } = useScene();
     const showResizer = useShowResizer(object);
     const [resizing, setResizing] = useState(false);

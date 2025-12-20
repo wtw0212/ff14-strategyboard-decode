@@ -1,9 +1,9 @@
-import { Field, mergeClasses } from '@fluentui/react-components';
+import { Field } from '@fluentui/react-components';
 import { useSpinChanged } from '../../prefabs/useSpinChanged';
 import { GameLineObject } from '../../scene';
 import { useScene } from '../../SceneProvider';
 import { SpinButton } from '../../SpinButton';
-import { useControlStyles } from '../../useControlStyles';
+
 import { commonValue } from '../../util';
 import { PropertiesControlProps } from '../PropertiesControl';
 

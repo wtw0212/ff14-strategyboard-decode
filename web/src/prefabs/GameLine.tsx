@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Circle, Group, Rect, Line } from 'react-konva';
-import { SpinButton, Label } from '@fluentui/react-components';
+import { Circle, Group, Rect } from 'react-konva';
 import { getDragOffset, registerDropHandler } from '../DropHandler';
 import { DetailsItem } from '../panel/DetailsItem';
 import { ListComponentProps, registerListComponent } from '../panel/ListComponentRegistry';
@@ -8,33 +7,20 @@ import { LayerName } from '../render/layers';
 import { registerRenderer, RendererProps } from '../render/ObjectRegistry';
 import { GameLineObject, ObjectType } from '../scene';
 import { useScene } from '../SceneProvider';
-import { panelVars, CENTER_DOT_RADIUS, makeColorSwatch } from '../theme';
+import { CENTER_DOT_RADIUS } from '../theme';
 import { usePanelDrag } from '../usePanelDrag';
 import { PrefabIcon } from './PrefabIcon';
 import { DraggableObject } from './DraggableObject';
 import { useShowResizer, useHighlightProps } from './highlight';
 import { HideGroup } from './HideGroup';
-import { SelectableObject } from './SelectableObject';
 import { useIsDragging } from '../selection';
 import { ActivePortal } from '../render/Portals';
 import { getPointerAngle, snapAngle } from '../coord';
 import { getResizeCursor } from '../cursor';
 import { distance, VEC_ZERO, vecAtAngle, getDistanceFromLine } from '../vector';
 import { CONTROL_POINT_BORDER_COLOR, createControlPointManager, HandleFuncProps, HandleStyle } from './ControlPoint';
-import { useSpinChanged } from './useSpinChanged';
-import { CompactSwatchColorPicker } from '../CompactSwatchColorPicker';
 
-// Game color palette for color picker
-const GAME_COLOR_PALETTE = [
-    '#FFFFFF', '#FFBDBF', '#FFE0C8', '#FFF8B0', '#E9FFE2', '#E8FFFE', '#9CD0F4', '#FFDCFF',
-    '#F8F8F8', '#FF0000', '#FF8000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF',
-    '#E0E0E0', '#FF4C4C', '#FFA666', '#FFFFB2', '#80FF00', '#BCFFF0', '#0080FF', '#E26090',
-    '#D8D8D8', '#FF7F7F', '#FFCEAC', '#FFDE73', '#80F860', '#66E6FF', '#94C0FF', '#FF8CC6',
-];
 
-const COLOR_SWATCHES = GAME_COLOR_PALETTE.map((color, index) =>
-    makeColorSwatch(color, `gameline-${index}`)
-);
 
 // SVG icon for Game Line (thin tether-like line)
 const GameLineIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
