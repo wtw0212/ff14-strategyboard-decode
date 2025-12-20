@@ -91,23 +91,12 @@ type LegacyEnemyObject = Omit<EnemyObject, 'opacity' | 'rotation' | 'ring'> & {
     ring?: EnemyRingStyle;
 };
 
-function getRingStyle<T extends LegacyEnemyObject>(object: T): EnemyRingStyle {
-    if (object.rotation === undefined) {
-        return EnemyRingStyle.NoDirection;
-    }
 
-    if ('omniDirection' in object && typeof object.omniDirection === 'boolean') {
-        return object.omniDirection ? EnemyRingStyle.NoDirection : EnemyRingStyle.Directional;
-    }
-
-    return EnemyRingStyle.Directional;
-}
 
 function upgradeEnemy(object: LegacyEnemyObject): EnemyObject {
     return {
         ...object,
         rotation: object.rotation ?? 0,
-        ring: object.ring ?? getRingStyle(object),
         opacity: object.opacity ?? DEFAULT_ENEMY_OPACITY,
     };
 }

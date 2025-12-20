@@ -21,13 +21,12 @@ import {
     CustomRectangularGrid,
     GridType,
     RadialGrid,
-    RectangularGrid,
     Scene,
 } from '../scene';
 import { getArenaShapeConfig, getGridShapeConfig, useSceneTheme, useSceneThemeHtmlStyle } from '../theme';
 import { useImageTracked } from '../useObjectLoading';
 import { useStyledSvg } from '../useStyledSvg';
-import { degtorad, getLinearGridDivs, getUrlFileExtension } from '../util';
+import { degtorad, getUrlFileExtension } from '../util';
 import { ArenaTickRenderer } from './ArenaTickRenderer';
 
 export interface ArenaRendererProps {
@@ -359,39 +358,7 @@ const RadialGridRenderer: React.FC<GridProps<RadialGrid>> = ({ grid }) => {
     );
 };
 
-const RectangularGridRenderer: React.FC<GridProps<RectangularGrid>> = ({ grid }) => {
-    const theme = useSceneTheme();
-    const { scene } = useScene();
 
-    const position = getCanvasArenaRect(scene);
-    const shapeConfig = getGridShapeConfig(theme);
-
-    const rows = getLinearGridDivs(grid.rows, position.y, position.height);
-    const cols = getLinearGridDivs(grid.columns, position.x, position.width);
-
-    return (
-        <Shape
-            sceneFunc={(ctx, shape) => {
-                ctx.beginPath();
-
-                for (const x of cols) {
-                    ctx.moveTo(x, position.y);
-                    ctx.lineTo(x, position.y + position.height);
-                }
-
-                for (const y of rows) {
-                    ctx.moveTo(position.x, y);
-                    ctx.lineTo(position.x + position.width, y);
-                }
-
-                ctx.closePath();
-                ctx.fillStrokeShape(shape);
-            }}
-            {...shapeConfig}
-            {...ALIGN_TO_PIXEL}
-        />
-    );
-};
 
 const CustomRectangularGridRenderer: React.FC<GridProps<CustomRectangularGrid>> = ({ grid }) => {
     const theme = useSceneTheme();
