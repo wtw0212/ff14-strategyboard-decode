@@ -33,7 +33,7 @@ const NAME = 'Game Line';
 const DEFAULT_WIDTH = 6;   // Default thickness (game range 2-10)
 const DEFAULT_LENGTH = 100;
 const DEFAULT_COLOR = '#ff8000';
-const DEFAULT_OPACITY = 100;
+const DEFAULT_OPACITY = 65;
 
 // Minimum and maximum values for width
 const MIN_WIDTH = 2;
