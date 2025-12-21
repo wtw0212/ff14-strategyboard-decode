@@ -119,7 +119,7 @@ const useStyles = makeStyles({
     },
     body: {
         fontSize: '0.9em',
-        color: '#ccc',
+        color: 'black',
         paddingLeft: '8px',
         borderLeft: '2px solid #444',
         whiteSpace: 'pre-wrap',
