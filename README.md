@@ -152,6 +152,17 @@ npm run dev
 - [x] Text object truncation safeguard (30 char limit)
 
 ### Known Issues
+
+**In-game (Types):**
+- [ ] **Knockback**: Rendering or behavior discrepancies
+- [ ] **Line Stack**: Visual representation issues
+- [ ] **Moving AOE**: Pathing or endpoint sync issues
+
+**Website Features:**
+- [ ] **Counters**: Not yet supported in game export
+- [ ] **Target Indicators**: Alignment and type mapping
+- [ ] **Status Effects**: Missing asset icons and mapping
+- [ ] **Drawing**: Freehand drawings cannot be exported to game code
 - [ ] Complex Z-indexing between mixed object types
 - [ ] Narrow cone arcs (<90°) may have ~2px coordinate offset in extreme cases
 
