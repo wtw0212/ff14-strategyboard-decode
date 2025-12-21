@@ -11,7 +11,7 @@ interface ZoomContextType {
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2.0;
 const ZOOM_STEP = 0.1;
-const DEFAULT_ZOOM = 2.0;
+const DEFAULT_ZOOM = 1.0;
 
 const ZoomContext = createContext<ZoomContextType | null>(null);
 

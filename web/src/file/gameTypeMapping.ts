@@ -624,31 +624,30 @@ function convertObject(
     }
 
     // GameLine (0x0C) - game's line/tether type
-    // Game stores: center position, end point (PARAM_A/B × 10), height/thickness (PARAM_C)
+    // Game stores: center position (x, y), end point (PARAM_A/B × 10), thickness (PARAM_C)
+    // Web: GameLine (x, y) is NOW the center of the line
     if (isGameLine(obj)) {
         gameObj.typeId = GAME_TYPES.line;
 
-        // Line extends from position (x, y) in direction of rotation by length
-        // Web: rotation 0 = horizontal (right), so add 90° to convert to math angle
+        // Web GameLine: (x, y) is the center, rotation 0 = horizontal (right)
+        // Game expects: center position and one end point
+        // Add 90° to convert from web rotation (0=right) to math angle (0=up)
         const rotRad = ((obj.rotation + 90) * Math.PI) / 180;
         const halfLength = obj.length / 2;
 
-        // Line origin is at one end, calculate center
-        const centerX = obj.x + Math.sin(rotRad) * halfLength;
-        const centerY = obj.y - Math.cos(rotRad) * halfLength;
+        // Center is obj.x, obj.y (already centered)
+        gameObj.x = Math.round(obj.x);
+        gameObj.y = Math.round(obj.y);
 
-        // End point is at full length from origin
-        const endX = obj.x + Math.sin(rotRad) * obj.length;
-        const endY = obj.y - Math.cos(rotRad) * obj.length;
-
-        gameObj.x = Math.round(centerX);
-        gameObj.y = Math.round(centerY);
+        // End point is center + halfLength in direction of rotation
+        const endX = obj.x + Math.sin(rotRad) * halfLength;
+        const endY = obj.y - Math.cos(rotRad) * halfLength;
 
         // PARAM_A = end X × 10, PARAM_B = end Y × 10
         gameObj.paramA = Math.round(endX * 10);
         gameObj.paramB = Math.round(endY * 10);
 
-        // PARAM_C = height/thickness (game range 2-10, default 6)
+        // PARAM_C = thickness (game range 2-10, default 6)
         gameObj.paramC = Math.min(10, Math.max(2, Math.round(obj.width)));
 
         return gameObj;
@@ -1118,6 +1117,34 @@ function convertGameToSceneObject(gameObj: GameObject, idMap: Record<number, str
         return { ...base, type: ObjectType.LineKnockback, width: 20, height: 60 } as any; // Approximate defaults
     }
 
+    // 5.5 Game Line (0x0C) - game's line/tether type
+    // Game stores: center position (x, y), end point (paramA/10, paramB/10), thickness (paramC)
+    if (gameObj.typeId === GAME_TYPES.line) {
+        // Calculate end point from paramA/B (stored as × 10)
+        const endX = gameObj.paramA / 10;
+        const endY = gameObj.paramB / 10;
+
+        // Calculate length as distance from center to end, doubled (line extends both directions from center)
+        const dx = endX - gameObj.x;
+        const dy = endY - gameObj.y;
+        const halfLength = Math.sqrt(dx * dx + dy * dy);
+        const length = Math.round(halfLength * 2);
+
+        // Calculate rotation from direction vector
+        // Game: rotation points from center to end
+        // Web: rotation 0 = horizontal (right), need to convert from math angle
+        let rotation = Math.atan2(dy, dx) * 180 / Math.PI - 90;
+        rotation = mod360(rotation + 180) - 180;
+
+        return {
+            ...base,
+            type: ObjectType.GameLine,
+            length: length || 100,
+            width: gameObj.paramC || 6,  // thickness, game range 2-10
+            rotation: rotation
+        } as any;
+    }
+
     // 6. Jobs/Roles (Party)
     // Create mapping from game type ID to job icon info
     const gameTypeToJob: Record<number, { name: string; icon: string }> = {
@@ -1291,7 +1318,8 @@ export function getExportableStats(
             isEye(obj) ||
             isStarburstZone(obj) ||
             isMarker(obj) ||
-            isText(obj)
+            isText(obj) ||
+            isGameLine(obj)  // Game's 0x0C line type
         ) {
             exportable++;
         } else {
