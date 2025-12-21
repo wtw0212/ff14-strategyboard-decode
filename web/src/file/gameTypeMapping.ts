@@ -624,28 +624,40 @@ function convertObject(
     }
 
     // GameLine (0x0C) - game's line/tether type
-    // Game stores: center position (x, y), end point (PARAM_A/B × 10), thickness (PARAM_C)
-    // Web: GameLine (x, y) is NOW the center of the line
+    // Game stores: one end (position x, y), other end (PARAM_A/B × 10), thickness (PARAM_C)
+    // NOTE: Game position is ONE END of the line, not the center!
+    // Web: GameLine (x, y) is the CENTER of the line
     if (isGameLine(obj)) {
         gameObj.typeId = GAME_TYPES.line;
 
-        // Web GameLine: (x, y) is the center, rotation 0 = horizontal (right)
-        // Game expects: center position and one end point
-        // Add 90° to convert from web rotation (0=right) to math angle (0=up)
+        // Web GameLine: (x, y) is the center, rotation 0 = pointing right
+        // Game expects: position = one end, PARAM_A/B = other end
+
+        // Add 90° to convert from web rotation (0=right) to math angle for trig
         const rotRad = ((obj.rotation + 90) * Math.PI) / 180;
         const halfLength = obj.length / 2;
 
-        // Center is obj.x, obj.y (already centered)
-        gameObj.x = Math.round(obj.x);
-        gameObj.y = Math.round(obj.y);
+        // Scale coordinates and length if arena differs from 512x384
+        const scaledCenterX = gameObj.x;  // Already scaled by convertObject
+        const scaledCenterY = gameObj.y;
+        const scaledHalfLength = halfLength * scaleX;
 
-        // End point is center + halfLength in direction of rotation
-        const endX = obj.x + Math.sin(rotRad) * halfLength;
-        const endY = obj.y - Math.cos(rotRad) * halfLength;
+        // Calculate BOTH endpoints from the center
+        // End 1: center - halfLength in direction (this becomes Position)
+        const end1X = scaledCenterX - Math.sin(rotRad) * scaledHalfLength;
+        const end1Y = scaledCenterY + Math.cos(rotRad) * scaledHalfLength;
 
-        // PARAM_A = end X × 10, PARAM_B = end Y × 10
-        gameObj.paramA = Math.round(endX * 10);
-        gameObj.paramB = Math.round(endY * 10);
+        // End 2: center + halfLength in direction (this becomes PARAM_A/B)
+        const end2X = scaledCenterX + Math.sin(rotRad) * scaledHalfLength;
+        const end2Y = scaledCenterY - Math.cos(rotRad) * scaledHalfLength;
+
+        // Game Position = one end
+        gameObj.x = Math.round(end1X);
+        gameObj.y = Math.round(end1Y);
+
+        // PARAM_A = other end X × 10, PARAM_B = other end Y × 10
+        gameObj.paramA = Math.round(end2X * 10);
+        gameObj.paramB = Math.round(end2Y * 10);
 
         // PARAM_C = thickness (game range 2-10, default 6)
         gameObj.paramC = Math.min(10, Math.max(2, Math.round(obj.width)));
