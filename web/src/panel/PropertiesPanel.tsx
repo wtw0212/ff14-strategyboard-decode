@@ -8,7 +8,6 @@ import {
     isArcZone,
     isArrow,
     isConeZone,
-    isDrawObject,
     isExaflareZone,
     isEye,
     isGameLine,
@@ -33,7 +32,6 @@ import { getSelectedObjects, useSelection } from '../selection';
 import { useControlStyles } from '../useControlStyles';
 import { PropertiesControlProps } from './PropertiesControl';
 import { ArrowPointersControl } from './properties/ArrowControls';
-import { DrawObjectBrushControl } from './properties/BrushControl';
 import { ColorControl, ColorSwatchControl } from './properties/ColorControl';
 import { ConeAngleControl } from './properties/ConeControls';
 
@@ -133,7 +131,6 @@ const Controls: React.FC = () => {
                 <OpacityControl objects={objects} className={classes.grow} />
                 <HideControl objects={objects} />
             </div>
-            <ControlCondition objects={objects} test={isDrawObject} control={DrawObjectBrushControl} />
             <ControlCondition objects={objects} test={isText} control={TextLayoutControl} />
 
             {/* Position/Size */}

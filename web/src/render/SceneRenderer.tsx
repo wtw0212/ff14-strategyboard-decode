@@ -14,7 +14,6 @@ import { UndoContext } from '../undo/undoContext';
 import { usePanelDrag } from '../usePanelDrag';
 import { useZoom, ZOOM_STEP, MIN_ZOOM, MAX_ZOOM } from '../ZoomContext';
 import { ArenaRenderer } from './ArenaRenderer';
-import { DrawTarget } from './DrawTarget';
 import { ObjectRenderer } from './ObjectRenderer';
 import { StageContext } from './StageContext';
 import { TetherEditRenderer } from './TetherEditRenderer';
@@ -176,9 +175,7 @@ const SceneContents: React.FC<SceneContentsProps> = ({ listening, simple, backgr
 
                 <TetherEditRenderer />
             </Layer>
-            <Layer name={LayerName.Active} listening={listening}>
-                <DrawTarget />
-            </Layer>
+            <Layer name={LayerName.Active} listening={listening} />
             <Layer name={LayerName.Controls} listening={listening} />
         </>
     );
