@@ -1,21 +1,8 @@
 import React from 'react';
-import useImage from 'use-image';
-import { getDragOffset, registerDropHandler } from '../../DropHandler';
-import { DetailsItem } from '../../panel/DetailsItem';
-import { ListComponentProps, registerListComponent } from '../../panel/ListComponentRegistry';
-import { RendererProps, registerRenderer } from '../../render/ObjectRegistry';
-import { LayerName } from '../../render/layers';
-import { IconObject, ObjectType } from '../../scene';
-import { DEFAULT_IMAGE_OPACITY } from '../../theme';
-import { useImageTracked } from '../../useObjectLoading';
+import { getDragOffset } from '../../DropHandler';
+import { ObjectType } from '../../scene';
 import { usePanelDrag } from '../../usePanelDrag';
-import { HideGroup } from '../HideGroup';
 import { PrefabIcon } from '../PrefabIcon';
-import { ResizeableObjectContainer } from '../ResizeableObjectContainer';
-import { useHighlightProps } from '../highlight';
-import { Group, Image as KonvaImage, Rect } from 'react-konva';
-
-const DEFAULT_SIZE = 48;
 
 // Image paths for person AOE icons
 const PERSON_AOE_ICONS = {
