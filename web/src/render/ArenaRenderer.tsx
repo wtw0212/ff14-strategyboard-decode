@@ -39,6 +39,8 @@ export const ArenaRenderer: React.FC<ArenaRendererProps> = ({ backgroundColor, s
     const theme = useSceneTheme();
     backgroundColor ??= theme.colorBackground;
 
+    // Optimization: Render static background elements with listening={false}
+    // to prevent unnecessary hit detection calculations during mouse events.
     return (
         <>
             <Backdrop color={backgroundColor} />
@@ -60,7 +62,7 @@ const Backdrop: React.FC<BackdropProps> = ({ color }) => {
     const { scene } = useScene();
     const size = getCanvasSize(scene);
 
-    return <Rect fill={color} x={0} y={0} {...size} />;
+    return <Rect fill={color} x={0} y={0} {...size} listening={false} />;
 };
 
 function getArenaClip(scene: Scene): ((context: KonvaContext) => void) | undefined {
@@ -131,7 +133,7 @@ const BackgroundImageBitmap: React.FC<BackgroundImageProps> = ({ url, ...props }
         return null;
     }
 
-    return <Image image={image} {...props} />;
+    return <Image image={image} {...props} listening={false} />;
 };
 
 const BackgroundImageSvg: React.FC<BackgroundImageProps> = ({ url, ...props }) => {
@@ -142,7 +144,7 @@ const BackgroundImageSvg: React.FC<BackgroundImageProps> = ({ url, ...props }) =
         return null;
     }
 
-    return <Image image={image} {...props} />;
+    return <Image image={image} {...props} listening={false} />;
 };
 
 const BackgroundRenderer: React.FC = () => {
@@ -172,7 +174,7 @@ const CircularBackground: React.FC = () => {
     const theme = useSceneTheme();
     const shapeConfig = getArenaShapeConfig(theme);
 
-    return <Ellipse {...position} {...shapeConfig} {...SHADOW} />;
+    return <Ellipse {...position} {...shapeConfig} {...SHADOW} listening={false} />;
 };
 
 const RectangularBackground: React.FC = () => {
@@ -188,7 +190,7 @@ const RectangularBackground: React.FC = () => {
         height: position.height - 1,
     };
 
-    return <Rect {...alignedPosition} {...shapeConfig} {...SHADOW} {...ALIGN_TO_PIXEL} />;
+    return <Rect {...alignedPosition} {...shapeConfig} {...SHADOW} {...ALIGN_TO_PIXEL} listening={false} />;
 };
 
 const GridRenderer: React.FC = () => {
@@ -230,6 +232,7 @@ const EnhancedRectangularGridRenderer: React.FC = () => {
 
     return (
         <Shape
+            listening={false}
             sceneFunc={(ctx) => {
                 // Draw all grid lines (gray, thin)
                 ctx.beginPath();
@@ -332,6 +335,7 @@ const RadialGridRenderer: React.FC<GridProps<RadialGrid>> = ({ grid }) => {
 
     return (
         <Shape
+            listening={false}
             sceneFunc={(ctx, shape) => {
                 clip?.(ctx);
 
@@ -370,6 +374,7 @@ const CustomRectangularGridRenderer: React.FC<GridProps<CustomRectangularGrid>> 
 
     return (
         <Shape
+            listening={false}
             sceneFunc={(context, shape) => {
                 clip?.(context);
 
@@ -408,6 +413,7 @@ const CustomRadialGridRenderer: React.FC<GridProps<CustomRadialGrid>> = ({ grid 
 
     return (
         <Shape
+            listening={false}
             sceneFunc={(ctx, shape) => {
                 clip?.(ctx);
 
