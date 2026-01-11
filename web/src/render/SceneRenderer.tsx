@@ -18,6 +18,7 @@ import { ObjectRenderer } from './ObjectRenderer';
 import { StageContext } from './StageContext';
 import { TetherEditRenderer } from './TetherEditRenderer';
 import { LayerName } from './layers';
+import { useGroupedObjects } from './useGroupedObjects';
 
 export const SceneRenderer: React.FC = () => {
     const { scene } = useScene();
@@ -158,6 +159,7 @@ const SceneContents: React.FC<SceneContentsProps> = ({ listening, simple, backgr
     listening = listening ?? true;
 
     const step = useCurrentStep();
+    const groupedObjects = useGroupedObjects(step.objects);
 
     return (
         <>
@@ -165,13 +167,13 @@ const SceneContents: React.FC<SceneContentsProps> = ({ listening, simple, backgr
 
             <Layer name={LayerName.Ground} listening={listening}>
                 <ArenaRenderer backgroundColor={backgroundColor} simple={simple} />
-                <ObjectRenderer objects={step.objects} layer={LayerName.Ground} />
+                <ObjectRenderer objects={groupedObjects[LayerName.Ground]} />
             </Layer>
             <Layer name={LayerName.Default} listening={listening}>
-                <ObjectRenderer objects={step.objects} layer={LayerName.Default} />
+                <ObjectRenderer objects={groupedObjects[LayerName.Default]} />
             </Layer>
             <Layer name={LayerName.Foreground} listening={listening}>
-                <ObjectRenderer objects={step.objects} layer={LayerName.Foreground} />
+                <ObjectRenderer objects={groupedObjects[LayerName.Foreground]} />
 
                 <TetherEditRenderer />
             </Layer>
