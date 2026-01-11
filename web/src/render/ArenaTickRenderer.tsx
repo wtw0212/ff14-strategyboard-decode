@@ -17,6 +17,8 @@ export const ArenaTickRenderer: React.FC = () => {
         return null;
     }
 
+    // Optimization: Render ticks with listening={false} to skip hit detection on these static elements.
+
     switch (scene.arena.ticks.type) {
         case TickType.None:
             return null;
@@ -108,6 +110,7 @@ const MajorTick: React.FC<TickProps> = ({ x, y, angle }) => {
             height={MAJOR_TICK_SIZE}
             rotation={angle + 45}
             fill={theme.colorBorderTickMajor}
+            listening={false}
         />
     );
 };
@@ -125,6 +128,7 @@ const MinorTick: React.FC<TickProps> = ({ x, y, angle }) => {
             height={MINOR_TICK_SIZE}
             rotation={angle + 45}
             fill={theme.colorBorderTickMinor}
+            listening={false}
         />
     );
 };
